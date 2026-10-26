@@ -27,6 +27,20 @@ const store = createStore({
         },
         setHead(state, payload) {
             state.userInfo.head = payload;
+        },
+        // 退出登录：清空 token 与用户信息
+        clearLogin(state) {
+            state.token = undefined;
+            state.userInfo = {
+                adminType: '',
+                name: '',
+                account: '',
+                phone: '',
+                head: '',
+                email: '',
+                registerTime: '',
+                password: ''
+            };
         }
     }
 });

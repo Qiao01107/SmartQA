@@ -40,4 +40,8 @@ public interface AdminManageMapper {
       @Param("password") String password,
       @Param("account") String account);
 
+  // 修改个人信息（不修改密码，仅 phone/email）
+  void changeSelfInfoKeepPassword(@Param("phone") String phone, @Param("email") String email,
+      @Param("account") String account);
+
 }

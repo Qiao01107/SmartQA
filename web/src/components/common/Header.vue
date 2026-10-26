@@ -61,7 +61,7 @@ export default {
         // 用户名下拉菜单选择事件
         handleCommand(command) {
             if (command == 'loginout') {
-                store.state.token = '';
+                store.commit('clearLogin');
                 this.$router.push('/login');
             } else if (command == 'changeInformation') {
                 this.$router.push('/userInformation');

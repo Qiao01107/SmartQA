@@ -52,6 +52,13 @@
         WHERE account = #{account}
     </select>
 
+    <select id="changeSelfInfoKeepPassword">
+        UPDATE web_user
+        SET phone = #{phone} ,
+            email = #{email}
+        WHERE account = #{account}
+    </select>
+
 </mapper>
 
 

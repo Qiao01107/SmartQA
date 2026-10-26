@@ -143,6 +143,7 @@ DB_PASSWORD=... NEO4J_PASSWORD=... \
 ```
 
 > 首次启动时，若 `web_user` 表为空，`AdminInitializer` 会用 `INIT_ADMIN_ACCOUNT`/`INIT_ADMIN_PASSWORD` 自动创建初始超级管理员（默认 `admin`/`admin`）。
+> 密码以 **BCrypt 哈希**落库（不保存明文）；重复启动不会覆盖已有账号或重置密码。
 
 ### 5.2 前端（端口 8080）
 
@@ -215,7 +216,7 @@ mysql -uroot -p smartques < database/dev-test-data.sql
 
 ## 九、已知限制
 
-- 密码为**明文存储**（沿用原项目设计），未引入哈希。如需生产使用，建议改为 BCrypt 等哈希方案（需迁移现有账号数据）。
+- 密码已改为 **BCrypt 哈希**存储（`web_user` / `wechat_users` 均适用），不再明文保存。字段已扩容至 `varchar(100)`。
 - 前端登录 token 为本地会话标记（`session-<时间戳>`），后端暂未实现服务端会话鉴权。
 - 管理员管理接口未做服务端权限校验（仅前端按 `adminType` 控制菜单可见性）。
 - HanLP 使用内置词典（标准分词），未使用感知机大模型（portable 版不含）。

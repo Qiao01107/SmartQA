@@ -1,5 +1,6 @@
 package com.example.springboot.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
 
 public class WeChatUsers {
@@ -9,7 +10,11 @@ public class WeChatUsers {
   private String userStatus;
   private Date registerTime;
   private String profilePicture;
+
+  // 密码不回传给前端，避免泄露。
+  @JsonIgnore
   private String password;
+
   private String cause;
 
   public String getWeChatName() {

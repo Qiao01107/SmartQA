@@ -1,5 +1,6 @@
 package com.example.springboot.service;
 
+import com.example.springboot.config.PasswordEncoderUtil;
 import com.example.springboot.dao.WeChatLoginMapper;
 import com.example.springboot.entity.WeChatUsers;
 import java.text.SimpleDateFormat;
@@ -14,20 +15,29 @@ public class WeChatLoginService {
   @Autowired
   private WeChatLoginMapper weChatLoginMapper;
 
-  // 登录
+  @Autowired
+  private PasswordEncoderUtil passwordEncoderUtil;
+
+  // 登录：用 BCrypt 校验密码
   public int wechatLogin(String phone, String password) {
     List<WeChatUsers> users = weChatLoginMapper.findUsers();
     for (WeChatUsers i : users) {
-      if (i.getPhone().equals(phone) && i.getPassword().equals(password) && i.getUserStatus().equals("0")) {
+      if (!i.getPhone().equals(phone)) {
+        continue;
+      }
+      if (!passwordEncoderUtil.matches(password, i.getPassword())) {
+        continue;
+      }
+      if (i.getUserStatus().equals("0")) {
         return 0;
-      } else if(i.getPhone().equals(phone) && i.getPassword().equals(password) && i.getUserStatus().equals("1")){
+      } else if (i.getUserStatus().equals("1")) {
         return 1;
       }
     }
     return 2;
   }
 
-  // 注册
+  // 注册：密码以 BCrypt 哈希落库
   public boolean register(String wechatName, String phone, String profile_picture,
       String password) {
     List<WeChatUsers> users = weChatLoginMapper.findUsers();
@@ -39,16 +49,18 @@ public class WeChatLoginService {
     Date date = new Date();
     SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     String str = df.format(date);
-    weChatLoginMapper.register(wechatName, phone, str, profile_picture, password);
+    weChatLoginMapper.register(wechatName, phone, str, profile_picture,
+        passwordEncoderUtil.encode(password));
     return true;
   }
 
-  // 修改密码
+  // 修改密码：校验旧密码（BCrypt），新密码哈希落库
   public boolean wechatChangePassword(String phone, String oldPassword, String newPassword) {
     List<WeChatUsers> users = weChatLoginMapper.findUsers();
     for (WeChatUsers i : users) {
-      if (i.getPhone().equals(phone) && i.getPassword().equals(oldPassword)) {
-        weChatLoginMapper.wechatChangePassword(phone, newPassword);
+      if (i.getPhone().equals(phone)
+          && passwordEncoderUtil.matches(oldPassword, i.getPassword())) {
+        weChatLoginMapper.wechatChangePassword(phone, passwordEncoderUtil.encode(newPassword));
         return true;
       }
     }

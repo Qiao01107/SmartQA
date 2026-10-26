@@ -1,13 +1,14 @@
 @echo off
 REM ============================================================
-REM SmartQA 后端启动脚本（Windows）
-REM 从 .env 加载环境变量后启动 Spring Boot（端口 8081）
+REM SmartQA Backend Launcher (Windows)
+REM Load env vars from .env, then run the packaged jar on 8081.
+REM Usage: double-click, or run "start-backend.bat" in cmd.
 REM ============================================================
 setlocal EnableDelayedExpansion
 
 cd /d "%~dp0backend"
 
-REM 加载 .env（简单解析 KEY=VALUE）
+REM --- Load .env (simple KEY=VALUE parser) ---
 if exist "..\.env" (
     for /f "usebackq tokens=1,* delims==" %%a in ("..\.env") do (
         set "line=%%a"
@@ -17,10 +18,20 @@ if exist "..\.env" (
     )
 )
 
-REM 移除 WorkBuddy 注入的 SERVER__PORT 干扰，强制使用 8081
+REM --- Clear WorkBuddy-injected SERVER__PORT to force 8081 ---
 set "SERVER__PORT="
 
-echo [启动] SmartQA 后端，端口 8081 ...
-mvn spring-boot:run
+REM --- Locate packaged jar ---
+set "JAR="
+for %%f in (target\*.jar) do set "JAR=%%f"
+
+if not defined JAR (
+    echo [ERROR] No packaged jar found under target\. Run "mvn clean package -DskipTests" first.
+    pause
+    exit /b 1
+)
+
+echo [START] Running %JAR% on port 8081 ...
+java -jar "%JAR%" --server.port=8081
 
 endlocal

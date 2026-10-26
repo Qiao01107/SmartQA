@@ -1,5 +1,6 @@
 package com.example.springboot.service;
 
+import com.example.springboot.config.PasswordEncoderUtil;
 import com.example.springboot.dao.AdminManageMapper;
 import com.example.springboot.entity.WebUsers;
 import java.text.SimpleDateFormat;
@@ -14,6 +15,9 @@ public class AdminManageService {
   @Autowired
   private AdminManageMapper adminManageMapper;
 
+  @Autowired
+  private PasswordEncoderUtil passwordEncoderUtil;
+
   // 管理员表相关接口
   public boolean addWebUser(String name, String account, String phone, String adminType,
       String password) {
@@ -26,7 +30,9 @@ public class AdminManageService {
     Date date = new Date();
     SimpleDateFormat nowTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     String registerTime = nowTime.format(date);
-    adminManageMapper.addWebUser(name, account, phone, registerTime, adminType, password);
+    // 密码以 BCrypt 哈希落库，不保存明文。
+    adminManageMapper.addWebUser(name, account, phone, registerTime, adminType,
+        passwordEncoderUtil.encode(password));
     return true;
   }
 
@@ -54,7 +60,12 @@ public class AdminManageService {
 
   // 修改个人信息
   public boolean changeSelfInfo(String phone, String email, String password, String account) {
-    adminManageMapper.changeSelfInfo(phone, email, password, account);
+    // password 为明文输入，落库前做 BCrypt 哈希。若为空则保持原密码不变。
+    if (password != null && !password.isEmpty()) {
+      adminManageMapper.changeSelfInfo(phone, email, passwordEncoderUtil.encode(password), account);
+    } else {
+      adminManageMapper.changeSelfInfoKeepPassword(phone, email, account);
+    }
     return true;
   }
 

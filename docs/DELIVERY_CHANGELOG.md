@@ -36,11 +36,25 @@
 
 - `database/dev-test-data.sql` — 新增，开发测试问答数据（question/question_template）。
 - `database/dev-test-graph.cypher` — 新增，开发测试图谱数据（Neo4j Cypher）。
+- `database/migration-bcrypt-password.sql` — 新增，密码字段扩容迁移（varchar(20)→varchar(100)，幂等可重复执行）。
 - `.env.example` — 新增，环境变量模板（不含真实凭据）。
 - `.env` — 新增，本机真实凭据（已 gitignore，**不入库**）。
-- `start-backend.bat` — 新增，Windows 后端启动脚本（自动加载 .env）。
+- `start-backend.bat` — 新增，Windows 后端启动脚本（自动加载 .env，运行打包 jar）。
 - `README.md` — 全面更新（技术栈、环境准备、启动指南、验证状态、已知限制、Git 协作）。
 - `docs/TEST_REPORT.md` — 新增，完整测试报告。
+
+### 密码安全改造（BCrypt）
+
+- `backend/pom.xml` — 新增 `spring-security-crypto` 依赖（仅密码加密，不引入完整 Spring Security）。
+- `config/PasswordEncoderUtil.java` — 新增，BCrypt 哈希/校验统一封装。
+- `config/AdminInitializer.java` — 密码改 BCrypt 哈希落库；仅表空时创建；失败不静默。
+- `service/WebLoginService.java` — 登录改 `PasswordEncoderUtil.matches` 校验；改密码哈希落库。
+- `service/AdminManageService.java` — 新增/修改管理员密码哈希落库；修改个人信息空密码不重置。
+- `service/WeChatLoginService.java` — 微信用户注册/登录/改密均改 BCrypt。
+- `dao/AdminManageMapper.java` + `mapper/AdminManageMapper.xml` — 新增 `changeSelfInfoKeepPassword`。
+- `entity/WeChatUsers.java` — password 加 `@JsonIgnore`。
+- `web/src/store.js` — 新增 `clearLogin` 清空 token 与用户信息；退出登录改调 `clearLogin`。
+- `web/src/components/common/Header.vue` — 退出登录改调 `clearLogin`。
 
 ---
 
@@ -56,5 +70,6 @@
 1. **Neo4j 主键方案变更**：实体主键从「Neo4j 内部 `id(n)`」改为「节点属性 `bid` 业务自增」。这是 Neo4j 5.x 兼容的必要修改（`id()` 已弃用且 id 从 0 起导致与 MySQL 自增主键冲突）。
 2. **登录响应结构变更**：`/web_login` 返回体从「裸 `WebUsers` / null」改为 `{success, user}` / `{success, message}`，前端 Login.vue 已同步适配。
 3. **HanLP 分词器变更**：`NLPTokenizer`（感知机）→ `HanLP.segment`（标准分词），因 portable 版不含感知机模型。分词精度略降，但对实体匹配问答链路无影响。
+4. **密码存储变更**：全系统密码从「明文」改为「BCrypt 哈希」。`web_user.password` 与 `wechat_users.password` 字段由 `varchar(20)` 扩容到 `varchar(100)`（BCrypt 哈希固定 60 字符）。存量明文密码需删除重建（本仓库已清理）；新部署环境执行 `database/migration-bcrypt-password.sql` 即可。
 
 > 以上兼容性修改均有真实运行验证，详见 `docs/TEST_REPORT.md`。

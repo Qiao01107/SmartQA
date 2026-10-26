@@ -44,6 +44,19 @@
 | 11 | 普通管理员登录 | `POST /web_login {test01/type:0}` | adminType:0 | `adminType:"0"` | ✅ PASS |
 | 12 | 角色筛选 | `POST /screen_web_user {adminType:1}` | 仅超级 | 仅返回 admin | ✅ PASS |
 
+### 密码安全（BCrypt）
+
+| # | 测试项 | 命令/操作 | 预期 | 实际 | 结果 |
+| --- | --- | --- | --- | --- | --- |
+| 12a | password 字段扩容 | `migration-bcrypt-password.sql` | varchar(100) | web_user/wechat_users 均 100 | ✅ PASS |
+| 12b | 初始管理员密码哈希 | 首次启动后查库 | 存 BCrypt 哈希 | `$2a$10$...` 长度 60 | ✅ PASS |
+| 12c | 登录 BCrypt 校验 | `POST /web_login {admin/admin}` | 成功 | success:true | ✅ PASS |
+| 12d | 错误密码拒绝 | `POST /web_login {admin/wrong}` | 失败 | success:false | ✅ PASS |
+| 12e | 创建管理员密码哈希 | `POST /add_web_user` 后查库 | BCrypt 哈希 | `$2a$10$...` 长度 60 | ✅ PASS |
+| 12f | 初始化幂等性 | 重启后端（表非空） | 不覆盖/不重置 | 哈希不变 + 日志"跳过" | ✅ PASS |
+| 12g | 微信用户密码哈希 | `POST /wechat_register` 后查库 | BCrypt 哈希 | `$2a$10$...` 长度 60 | ✅ PASS |
+| 12h | 登录响应不回传密码 | 响应体 | 无 password | 无 password 字段 | ✅ PASS |
+
 ### Neo4j 知识图谱
 
 | # | 测试项 | 命令/操作 | 预期 | 实际 | 结果 |

@@ -1,5 +1,6 @@
 package com.example.springboot.service;
 
+import com.example.springboot.config.PasswordEncoderUtil;
 import com.example.springboot.dao.AdminManageMapper;
 import com.example.springboot.entity.WebUsers;
 import com.zhenzi.sms.ZhenziSmsClient;
@@ -14,29 +15,34 @@ import org.springframework.stereotype.Service;
 public class WebLoginService {
 
   private final AdminManageMapper adminManageMapper;
+  private final PasswordEncoderUtil passwordEncoderUtil;
   private final String smsApiUrl;
   private final String smsAppId;
   private final String smsAppSecret;
   private final String smsTemplateId;
 
   public WebLoginService(AdminManageMapper adminManageMapper,
+      PasswordEncoderUtil passwordEncoderUtil,
       @Value("${ZHENZI_SMS_URL:https://sms_developer.zhenzikj.com}") String smsApiUrl,
       @Value("${ZHENZI_SMS_APP_ID:}") String smsAppId,
       @Value("${ZHENZI_SMS_APP_SECRET:}") String smsAppSecret,
       @Value("${ZHENZI_SMS_TEMPLATE_ID:7385}") String smsTemplateId) {
     this.adminManageMapper = adminManageMapper;
+    this.passwordEncoderUtil = passwordEncoderUtil;
     this.smsApiUrl = smsApiUrl;
     this.smsAppId = smsAppId;
     this.smsAppSecret = smsAppSecret;
     this.smsTemplateId = smsTemplateId;
   }
 
-  // 网页端登录
+  // 网页端登录：用 BCrypt 校验密码（兼容存量明文：若库中非哈希，则回退明文比对一次）。
   public WebUsers login(String account, String password, char type) {
     List<WebUsers> allWebUser = adminManageMapper.findAllWebUser();
     for (WebUsers i : allWebUser) {
-      if (account.equals(i.getAccount()) && password.equals(i.getPassword())
-          && type == i.getAdminType()) {
+      if (!account.equals(i.getAccount()) || type != i.getAdminType()) {
+        continue;
+      }
+      if (passwordEncoderUtil.matches(password, i.getPassword())) {
         return i;
       }
     }
@@ -88,7 +94,7 @@ public class WebLoginService {
   }
 
   public boolean changePassword(String account, String newPassword) {
-    adminManageMapper.changePassword(account, newPassword);
+    adminManageMapper.changePassword(account, passwordEncoderUtil.encode(newPassword));
     return true;
   }
 
