@@ -1,0 +1,19 @@
+# SmartQA Neo4j 5.26 本地开发环境
+# 用法：docker compose up -d
+# 首次启动会创建数据卷 smartqa-neo4j-data-5，密码由 NEO4J_AUTH 设置（仅首次生效）。
+# 注意：请用 .env 中的 NEO4J_PASSWORD 与下方密码保持一致。
+services:
+  neo4j:
+    image: neo4j:5.26.0
+    container_name: smartqa-neo4j
+    ports:
+      - "127.0.0.1:7474:7474"   # HTTP / Bolt
+      - "127.0.0.1:7687:7687"   # Bolt（后端 Driver 使用）
+    environment:
+      - NEO4J_AUTH=neo4j/请改成你的Neo4j密码
+    volumes:
+      - smartqa-neo4j-data-5:/data
+    restart: unless-stopped
+
+volumes:
+  smartqa-neo4j-data-5:
