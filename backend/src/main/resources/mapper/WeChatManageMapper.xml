@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springboot.dao.WeChatManageMapper">
+
+    <select id="disableUser">
+        UPDATE wechat_users
+        SET userStatus = "1" , cause = #{cause}
+        WHERE phone = #{phone}
+    </select>
+    <select id="ableUser">
+        UPDATE wechat_users
+        SET userStatus = "0" , cause = null
+        WHERE phone = #{phone}
+    </select>
+    <select id="searchWeChatUser" resultType="com.example.springboot.entity.WeChatUsers">
+        SELECT * FROM wechat_users
+        WHERE phone LIKE #{phone}
+    </select>
+    <select id="screenWeChatUser" resultType="com.example.springboot.entity.WeChatUsers">
+        SELECT * FROM wechat_users
+        WHERE userStatus = #{status}
+    </select>
+    <select id="countWeChatUser" resultType="int">
+        SELECT COUNT(*) FROM wechat_users
+    </select>
+    <select id="getWeChatUser" resultType="com.example.springboot.entity.WeChatUsers">
+        SELECT * FROM wechat_users
+        LIMIT #{start},#{number}
+    </select>
+
+</mapper>
+
+

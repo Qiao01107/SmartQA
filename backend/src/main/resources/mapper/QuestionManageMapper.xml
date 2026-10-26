@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springboot.dao.QuestionManageMapper">
+
+    <select id="addQuestion">
+        INSERT INTO question(id,question,answer,questionStatus)
+        VALUES (NULL,#{question},#{answer},#{status})
+    </select>
+    <select id="removeQuestion">
+        DELETE FROM question
+        WHERE question = #{question}
+    </select>
+    <select id="changeQuestion">
+        UPDATE question
+        SET question = #{question}
+        WHERE id = #{id}
+    </select>
+    <select id="changeAnswer">
+        UPDATE question
+        SET answer = #{answer} , questionStatus = #{status}
+        WHERE id = #{id}
+    </select>
+    <select id="screenQuestion" resultType="com.example.springboot.entity.Question">
+        SELECT * FROM question
+        WHERE questionStatus = #{status}
+    </select>
+    <select id="countQuestion" resultType="int">
+        SELECT COUNT(*) FROM question
+    </select>
+    <select id="getQuestion" resultType="com.example.springboot.entity.Question">
+        SELECT * FROM question
+        LIMIT #{start},#{number}
+    </select>
+    <select id="findAllQuestion" resultType="com.example.springboot.entity.Question">
+        SELECT * FROM question
+    </select>
+
+</mapper>
+
+

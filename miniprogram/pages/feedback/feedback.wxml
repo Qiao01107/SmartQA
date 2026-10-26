@@ -1,0 +1,43 @@
+<!--pages/feedback/feedback.wxml-->
+<view class='topTabSwiper'>
+    <view class='tab  {{currentData == 0 ? "tabBorer" : ""}}'  data-current = "0" bindtap='checkCurrent'>提交反馈</view>
+    <view class='tab  {{currentData == 1 ? "tabBorer" : ""}}'  data-current = "1" bindtap='checkCurrent'>我的反馈</view>
+</view>
+<swiper current="{{currentData}}" class='swiper' style="height:600px;" duration="300" bindchange="bindchange">
+  <swiper-item>
+    <Tabs tabs="{{tabs}}" bindtabsItemChange="handleTabsItemChange">
+    <view class="fb_main">
+        
+        <view class="fb_content">
+            <textarea style="padding: 10px;" value="{{textValue}}" bindinput = "handleTextInput" placeholder="请输入不满意回答对应的问题"></textarea>
+            <view class="fb_tool">
+            </view>
+        </view>
+        <view class="fb_content">
+            <textarea style="padding: 10px;" value="{{textValue2}}" bindinput = "handleTextInput2" placeholder="   请输入反馈内容（例如：答案不正确）"></textarea>
+            <view class="fb_tool">
+            </view>
+        </view>
+        <view class="form_btn_wrap"> 
+            <button bindtap="handlefrom">
+                <icon type="success_no_circle"color="black"></icon>
+                提交
+            </button>
+        </view>
+    </view>
+</Tabs>
+  </swiper-item>
+  <swiper-item>
+    <scroll-view class="feedbackBox" scroll-y="true" enable-flex="true" scroll-top="40">
+    <view class="item" wx:for="{{question}}" wx:key="id" wx:for-item="item" data-question="{{item.question}}">
+      <view class="content">
+        <view class="feedback" >我的反馈：{{item.question}}</view>
+        <view class="feedback" wx:if="{{item.status == 1}}" >反馈已采纳：{{item.evaluation}}</view>
+        <view class="feedback" wx:elif="{{item.status == 2}}" >反馈未采纳：{{item.evaluation}}</view>
+        <view class="feedback" wx:else >反馈进行中，请不要着急哦~</view>
+      </view>
+      <view class="date">{{item.feedbackTime}}</view>
+    </view>
+  </scroll-view>
+  </swiper-item>
+</swiper>

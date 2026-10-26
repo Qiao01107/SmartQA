@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springboot.dao.FeedbackManageMapper">
+
+    <select id="getUserInfo" resultType="com.example.springboot.entity.WeChatUsers">
+        SELECT * FROM wechat_users
+        WHERE phone = #{phone}
+    </select>
+    <select id="changeFeedback">
+        UPDATE feedback_users
+        SET status = #{status} , evaluation = #{evaluation}
+        WHERE phone = #{phone}
+          AND opinion = #{opinion}
+          AND question = #{question}
+          AND feedbackTime = #{feedbackTime}
+    </select>
+    <select id="screenFeedback" resultType="com.example.springboot.entity.FeedbackUsers">
+        SELECT * FROM feedback_users
+        WHERE status = #{status}
+    </select>
+    <select id="countFeedback" resultType="int">
+        SELECT COUNT(*) FROM feedback_users
+    </select>
+    <select id="getFeedback" resultType="com.example.springboot.entity.FeedbackUsers">
+        SELECT * FROM feedback_users
+        LIMIT #{start},#{number}
+    </select>
+    <select id="findAllFeedback" resultType="com.example.springboot.entity.FeedbackUsers">
+        SELECT * FROM feedback_users
+    </select>
+
+</mapper>
+
+

@@ -1,0 +1,13 @@
+<!--pages/question/simple/simplequestion.wxml-->
+<view class="container">
+
+  <view class="content" >
+    <view class="question">
+      <text>{{question}}</text>
+    </view>
+    <view class="answer">
+      <text>{{answer}}</text>
+    </view>
+  </view>
+</view>
+

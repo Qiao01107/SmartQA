@@ -1,0 +1,21 @@
+<!--pages/user/history/history.wxml-->
+<view class="container">
+  <view class="explain">
+    <text>用户搜索历史</text>
+  </view>
+  
+  <scroll-view class="historyBox" scroll-y="true" enable-flex="true" scroll-top="40">
+    <view class="item" wx:if="{{item.speaker == 'customer'}}" wx:for="{{question}}" wx:key="id" wx:for-item="item" data-question="{{item.content}}" bindtap="objectTap">
+      <view class="content">
+        <view class="history" >问题：{{item.content}}</view>
+        <!-- <view class="history" wx:else>{{item.content}}</view> -->
+        <!-- <wxs src="../../../utils/app.wxs" module="tools"/>
+        <view class="answer" >{{tools.substring(item.searchAnswerGraph,16)}}</view>
+         -->
+      </view>
+      <view class="date">{{item.speakDate}}</view>
+    </view>
+  </scroll-view>
+  <button class="btn1" bindtap="clean" >清除历史记录</button>
+</view>
+

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springboot.dao.WeChatLoginMapper">
+
+    <select id="findUsers" resultType="com.example.springboot.entity.WeChatUsers">
+        SELECT * FROM wechat_users;
+    </select>
+    <select id="register">
+        INSERT into wechat_users(wechatName,phone,userStatus,registerTime,profilePicture,password,cause) VALUES(#{wechatName},#{phone},'0',#{register_time},#{profile_picture} ,#{password},NULL);
+    </select>
+    <select id="wechatChangePassword" resultType="com.example.springboot.entity.WeChatUsers">
+        UPDATE wechat_users set password=#{newPassword} WHERE phone=#{phone};
+    </select>
+
+</mapper>
+
+

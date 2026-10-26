@@ -1,0 +1,22 @@
+<!--pages/user/history/history.wxml-->
+  <view class="explain">
+    <text>用户收藏</text>
+  </view>
+  
+  <view class="historyBox" >
+    <view class="item" wx:for="{{collection}}" wx:key="id" wx:for-item="item" bindtap="objectTap" data-id="{{item.questionId}}" data-question="{{item.searchContent}}" data-answer="{{item.searchAnswerGraph}}">
+      <view class="content">
+        <scroll-view class="history" scroll-y="true" enable-flex="true" scroll-top="0"> <text>
+         问题：{{item.question}} \n 回答：{{item.reply}}
+        </text>
+        </scroll-view>
+        <!-- <wxs src="../../../utils/app.wxs" module="tools"/>
+        <view class="answer" >{{tools.substring(item.searchAnswerGraph,16)}}</view>
+         -->
+      </view>
+      <view class="date" style="display: flex; justify-content: flex-end;">{{item.collectDate}}</view>
+    </view>
+  </view>
+
+
+

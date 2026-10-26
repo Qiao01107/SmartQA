@@ -1,0 +1,118 @@
+/* pages/feedback/feedback.wxss */
+page {
+    background-color: #f5f5f5;
+  }
+  .fb_main {
+      padding:20rpx;
+      color: #666;
+      }
+    .fb_tips {
+        display: flex;
+        flex-wrap: wrap;
+      
+    }
+      .date{
+        font-size: 13.5px;
+        margin-left: 21%;
+        color: rgb(218, 83, 6);
+        max-width: -25%;
+      }
+    .fb_content {
+        background-color: #fff;
+        margin-top: 20rpx;
+        border-radius: 15px;
+    }
+    .fb_tool {
+          display: flex;
+          flex-wrap: wrap;
+          padding-bottom: 30rpx;
+          color:black;
+      }
+    button{
+            margin: 0;
+              width: 90rpx;
+              height: 90rpx;
+              font-size: 60rpx;
+              padding: 0;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              margin-left: 20rpx;
+              margin-top: 20rpx;
+              color: rgb(250, 250, 250);
+          }
+    .up_img_item{
+            margin-left: 20rpx;
+            margin-top: 20rpx;
+          }
+    .form_btn_wrap {
+        margin-top: 20rpx;
+        display: flex;
+        justify-content: flex-end;
+    }
+  button{
+          margin: 0;
+          width: 38%;
+          color: rgb(0, 0, 0);
+          background-color: #68caf7;
+        }
+        .tab {
+          float: left;
+          width: 50%;
+          text-align: center;
+          padding: 10rpx 0;
+        }
+         
+        .topTabSwiper {
+          border-top: 1px solid rgb(255, 255, 255);
+          border-bottom: 1px solid rgb(255, 255, 255);
+          zoom: 1;
+        }
+         
+        .topTabSwiper:after {
+          content: "";
+          clear: both;
+          display: block;
+        }
+         
+        .tabBorer {
+          border-bottom: 1px solid#68caf7;
+          color: #68caf7;
+        }
+         
+        .swiper {
+          width: 100%;
+        }
+         
+        .swiper_con {
+          text-align: center;
+          width: 100%;
+          height: 100%;
+          padding: 80rpx 0;
+        }
+        .feedbackBox{
+          width: 98%;
+          display: flex;
+          flex-direction: column;
+          background: #f2f2f2;
+          margin-top: 5px;
+        }
+        .content{
+          width: 90%;
+          display: flex;  
+          flex-direction: column;
+          margin-left: 10px;
+        }
+        .content .feedback{
+          display: flex;  
+          align-items: center;
+          margin-left: 10px;
+          font-size: 21px;
+          color: rgb(61, 61, 61);
+        }
+        .feedbackBox .item{
+          display: flex;
+          flex-direction: column;
+          background-color: #fafafa;
+          margin-top: 5px;
+        }

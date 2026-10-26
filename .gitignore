@@ -1,0 +1,64 @@
+# =========================================================
+# SmartQA 根目录 .gitignore
+# 仅作用于本仓库根目录；各子项目原有 .gitignore 保持不变。
+# =========================================================
+
+# ---------- 构建产物 ----------
+target/
+dist/
+build/
+*.class
+*.war
+*.ear
+
+# ---------- 依赖缓存 ----------
+node_modules/
+
+# ---------- IDE / 编辑器（个人配置）----------
+.idea/
+*.iml
+.vscode/
+.VSCodeCounter/
+
+# ---------- WorkBuddy 本地工作数据 ----------
+.workbuddy/
+
+# ---------- 日志与临时文件 ----------
+*.log
+logs/
+*.tmp
+*.temp
+*.bak
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- 环境变量与本地敏感配置 ----------
+.env
+.env.local
+.env.*.local
+*.local
+application-local.yml
+application-local.yaml
+application-local.properties
+config.local.*
+secrets/
+*.secret
+
+# ---------- 本地数据库备份 ----------
+*.sql.bak
+*.sql.gz
+*.dump
+backup/
+backups/
+dump/
+database/backup/
+
+# ---------- 历史与过程文档（含个人资料，默认不公开）----------
+docs/archive/
+
+# ---------- 说明 ----------
+# 以下文件仍应被版本管理：
+#   package-lock.json、pom.xml、mvnw、.mvn/wrapper/*
+#   backend/src/main/resources/application.yml（含原项目连接信息，公开前需先脱敏）

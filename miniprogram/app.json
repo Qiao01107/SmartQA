@@ -1,0 +1,42 @@
+{
+  "pages":[
+    "pages/load/load",
+    "pages/login/login",
+    "pages/enroll/enroll",
+    "pages/home/home",
+    "pages/logs/logs",
+    "pages/user/user",
+    "pages/history/history",
+    "pages/simplequestion/simplequestion",
+    "pages/collection/collection",
+    "pages/changepw/changepw",
+    "pages/feedback/feedback"
+   
+  ],
+  "window":{
+    "backgroundTextStyle":"dark",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "智能问答机器人",
+    "navigationBarTextStyle":"black",
+    "backgroundColor": "#ddd"
+  },
+  "tabBar": {
+    "selectedColor": "#1296db",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "对话",
+        "iconPath": "icons/beebot.png",
+        "selectedIconPath": "icons/beebot2.png"
+      },  
+      {
+        "pagePath": "pages/user/user",
+        "text": "个人中心",
+        "iconPath": "icons/per1.png",
+        "selectedIconPath": "icons/per2.png"
+      }
+  ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

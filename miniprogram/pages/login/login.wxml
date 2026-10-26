@@ -1,0 +1,28 @@
+<!--pages/login/login.wxml-->
+<view class="logo">
+  <image mode="aspectFit" src="/icons/hnu.png"></image>
+  <!-- <image mode="aspectFit" src="/icons/beebot2.png"></image> -->
+</view>
+<view class="background">
+  <view class="first">
+      <input id="name" placeholder="手机号" placeholder-class='plas' class='inputs' bindinput='usernameInput' type="number" maxlength="15"/>
+  </view>
+
+  <view class="second">
+      <input id="psw" placeholder="登录密码" placeholder-class='plas' class='inputs2' type="text" password="{{passwordType}}" bindinput='passwordInput' maxlength="15"/>
+      <image src='{{defaultType? "/icons/eyes0.png": "/icons/eyes1.png"}}' class='imageStyle' bindtap='eyeStatus'></image>
+  </view>
+
+  </view>
+  <view id="btn" class="click" disabled="{{is_disabled}}" bindtap="login">登 录</view>
+
+<view style="display: flex;justify-content: space-between;">
+  <view class="cha" bindtap='signup'>
+    <text class="no">点我注册</text>
+  </view>
+  <!-- <view class="cha" bindtap='test'>
+    <text class="no">测试用</text>
+  </view> -->
+</view>
+
+

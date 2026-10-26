@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springboot.dao.RelationManageMapper">
+
+    <select id="addRelation">
+        INSERT INTO entity_relation(startEntity,endEntity,label,relation)
+        VALUES (#{startEntityId},#{endEntityId},#{label},#{relation})
+    </select>
+    <select id="removeRelation" >
+        DELETE FROM entity_relation
+        WHERE startEntity = #{startEntityId}
+          AND endEntity = #{endEntityId}
+          AND label = #{label}
+          AND relation = #{relation}
+    </select>
+    <select id="deleteInRelation">
+        DELETE FROM entity_relation
+        WHERE endEntity = #{endEntityId}
+    </select>
+    <select id="deleteOutRelation">
+        DELETE FROM entity_relation
+        WHERE startEntity = #{startEntityId}
+    </select>
+    <select id="changeRelation">
+        UPDATE entity_relation
+        SET label = #{newLabel} , relation = #{newRelation}
+        WHERE startEntity = #{startEntityId}
+          AND endEntity = #{endEntityId}
+          AND label = #{oldLabel}
+          AND relation = #{oldRelation}
+    </select>
+    <select id="searchRelationByLabel" resultType="com.example.springboot.entity.EntityRelation">
+        SELECT * FROM entity_relation
+        WHERE label = #{inquire}
+    </select>
+    <select id="searchRelationByName" resultType="com.example.springboot.entity.EntityRelation">
+        SELECT * FROM entity_relation
+        WHERE relation = #{inquire}
+    </select>
+    <select id="countRelation" resultType="int">
+        SELECT COUNT(*) FROM entity_relation
+    </select>
+    <select id="getRelation" resultType="com.example.springboot.entity.EntityRelation">
+        SELECT * FROM entity_relation
+        LIMIT #{start},#{number}
+    </select>
+    <select id="getRelationLabel" resultType="String">
+        SELECT DISTINCT label FROM entity_relation
+    </select>
+    <select id="findAllRelation" resultType="com.example.springboot.entity.EntityRelation">
+        SELECT * FROM entity_relation
+    </select>
+
+</mapper>
+
+

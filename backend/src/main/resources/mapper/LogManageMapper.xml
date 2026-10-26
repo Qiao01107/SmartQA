@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springboot.dao.LogManageMapper">
+
+    <select id="recordOperation">
+        INSERT INTO log(account,name,operation,operationTime,usedInterface,operationStatus)
+        VALUES (#{account},#{name},#{operation},#{operationTime},#{usedInterface},#{operationStatus})
+    </select>
+    <select id="searchLog" resultType="com.example.springboot.entity.Log">
+        SELECT * FROM log
+        WHERE name = #{inquire}
+           OR account = #{inquire}
+    </select>
+    <select id="searchLogByAccount" resultType="String">
+        SELECT MAX(operationTime) FROM log
+        WHERE account = #{account}
+          AND operation = "登录系统"
+          AND operationTime NOT IN(
+            SELECT MAX(operationTime) FROM log
+            WHERE account = #{account}
+              AND operation = "登录系统"
+          )
+    </select>
+    <select id="countLog" resultType="int">
+        SELECT COUNT(*) FROM log
+    </select>
+    <select id="getLog" resultType="com.example.springboot.entity.Log">
+        SELECT * FROM log
+        LIMIT #{start},#{number}
+    </select>
+
+</mapper>
+
+

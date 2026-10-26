@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springboot.dao.WeChatReplyMapper">
+
+    <select id="findQue" resultType="com.example.springboot.entity.Question">
+        SELECT * FROM question;
+    </select>
+    <select id="findQueTemp" resultType="com.example.springboot.entity.QuestionTemplate">
+        SELECT * FROM question_template;
+    </select>
+    <select id="addSearch">
+        INSERT INTO search_time(id,question,searchTime,reply) VALUES(null ,#{question},#{searchTime},#{reply});
+    </select>
+    <select id="findSearchTime" resultType="com.example.springboot.entity.SearchTime">
+        SELECT * FROM search_time;
+    </select>
+
+</mapper>
+
+

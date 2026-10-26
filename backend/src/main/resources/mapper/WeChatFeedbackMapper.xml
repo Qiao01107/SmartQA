@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springboot.dao.WeChatFeedbackMapper">
+
+    <select id="findFeedback" resultType="com.example.springboot.entity.FeedbackUsers">
+        SELECT * FROM feedback_users;
+    </select>
+    <select id="feedback">
+        INSERT into feedback_users(phone,opinion,status,question,feedbackTime) VALUES(#{phone},#{opinion},#{status},#{question},#{feedbackTime});
+    </select>
+    <select id="feedbackView" resultType="com.example.springboot.entity.FeedbackUsers">
+        SELECT * FROM feedback_users
+        WHERE phone=#{phone};
+    </select>
+
+</mapper>
+
+

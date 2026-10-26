@@ -1,0 +1,106 @@
+/* pages/community/community.wxss */
+
+page {
+  background-color: #f1f1f1;
+}
+
+.inputRoom {
+  width: 100vw;
+  height: 16vw;
+  border-top: 1px solid #cdcdcd;
+  background-color: #f1f1f1;
+  position: fixed;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  z-index: 20;
+}
+
+.VoiceInput{
+  width: 100vw;
+  height: 16vw;
+  border-top: 1px solid #cdcdcd;
+  background-color: #f1f1f1;
+  position: fixed;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  z-index: 20;
+}
+.result{
+  width: 100%;
+  height: 80vw;
+  background-color:rgba(139, 172, 190, 0.932);
+  color: white;
+  position: fixed;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  z-index: 20;
+  justify-content: center;
+}
+.send{
+  width: 30%;
+  color:white; 
+  margin-right: 20%;
+  height:min-content; 
+  text-align:center; 
+  display: block;
+  font-size: small; 
+  box-sizing: border-box; 
+  top: 70%;
+}
+.resay{
+  width: 30%;
+  margin-left: 20%; 
+  height:min-content; 
+  text-align:center; 
+  display: block;
+  font-size: small; 
+  box-sizing: border-box; 
+  top: 70%;
+}
+
+input {
+  width: 76vw;
+  height: 9.33vw;
+  background-color: #fff;
+  border-radius: 40rpx;
+  margin-left: 2vw;
+  padding: 0 3vw;
+  font-size: 35rpx;
+  color: #444;
+}
+
+.leftMsg {
+  font-size: 35rpx;
+  color: #444;
+  line-height: 6vw;
+  padding: 2vw 2.5vw;
+  background-color: #fff;
+  margin-left: -1.6vw;
+  border-radius: 10rpx;
+  word-break: break-all;
+  z-index: 10;
+  max-width: 75%;
+}
+.rightMsg {
+  font-size: 35rpx;
+  color: rgb(255, 255, 255);
+  line-height: 6vw;
+  word-break: break-all;
+  padding: 2vw 2.5vw;
+  background-color: #10cfe5;
+  flex-wrap: wrap;
+  margin-right: -1.6vw;
+  border-radius: 10rpx;
+  z-index: 10;
+  max-width: 75%;
+}
+
+.saybutton{
+
+  transform: translateX(-10%);
+  border-radius: 10rpx;
+  left: 5%;
+}

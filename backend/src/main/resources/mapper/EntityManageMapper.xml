@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springboot.dao.EntityManageMapper">
+
+    <select id="addEntity">
+        INSERT INTO entity(id,label,name)
+        VALUES (#{id},#{label},#{name})
+    </select>
+    <select id="removeEntity">
+        DELETE FROM entity
+        WHERE id = #{id}
+    </select>
+    <select id="changeEntity">
+        UPDATE entity
+        SET label = #{label} , name = #{name}
+        WHERE id = #{id}
+    </select>
+    <select id="searchEntityById" resultType="com.example.springboot.entity.Entity">
+        SELECT * FROM entity
+        WHERE id = #{id}
+    </select>
+    <select id="searchEntityByLabel" resultType="com.example.springboot.entity.Entity">
+        SELECT * FROM entity
+        WHERE label = #{inquire}
+    </select>
+    <select id="searchEntityByName" resultType="com.example.springboot.entity.Entity">
+        SELECT * FROM entity
+        WHERE name = #{inquire}
+    </select>
+    <select id="countEntity" resultType="int">
+        SELECT COUNT(*) FROM entity
+    </select>
+    <select id="getEntity" resultType="com.example.springboot.entity.Entity">
+        SELECT * FROM entity
+        LIMIT #{start},#{number}
+    </select>
+    <select id="getEntityLabel" resultType="String">
+        SELECT DISTINCT label FROM entity
+    </select>
+    <select id="getEntityId" resultType="int">
+        SELECT id FROM entity
+        WHERE label = #{label}
+          AND name = #{name}
+    </select>
+    <select id="findAllEntity" resultType="com.example.springboot.entity.Entity">
+        SELECT * FROM entity
+    </select>
+
+</mapper>
+
+

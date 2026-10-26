@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springboot.dao.AdminManageMapper">
+
+    <select id="addWebUser">
+        INSERT INTO web_user(name,account,phone,head,email,registerTime,adminType,password)
+        VALUES (#{name},#{account},#{phone},"0",NULL,#{registerTime},#{adminType},#{password})
+    </select>
+    <select id="removeWebUser">
+        DELETE FROM web_user
+        WHERE account = #{account}
+    </select>
+    <select id="changePassword">
+        UPDATE web_user
+        SET password = #{newPassword}
+        WHERE account = #{account}
+    </select>
+    <select id="changeAdmin">
+        UPDATE web_user
+        SET phone = #{phone} , adminType = #{adminType}
+        WHERE account = #{account}
+    </select>
+    <select id="changeHead">
+        UPDATE web_user
+        SET head = #{head}
+        WHERE account = #{account}
+    </select>
+    <select id="searchWebUser" resultType="com.example.springboot.entity.WebUsers">
+        SELECT * FROM web_user
+        WHERE account = #{account}
+    </select>
+    <select id="screenWebUser" resultType="com.example.springboot.entity.WebUsers">
+        SELECT * FROM web_user
+        WHERE adminType = #{adminType}
+    </select>
+    <select id="countWebUser" resultType="int">
+        SELECT COUNT(*) FROM web_user
+    </select>
+    <select id="getWebUser" resultType="com.example.springboot.entity.WebUsers">
+        SELECT * FROM web_user
+        LIMIT #{start},#{number}
+    </select>
+    <select id="findAllWebUser" resultType="com.example.springboot.entity.WebUsers">
+        SELECT * FROM web_user
+    </select>
+
+    <select id="changeSelfInfo">
+        UPDATE web_user
+        SET phone = #{phone} ,
+            email = #{email} ,
+            password = #{password}
+        WHERE account = #{account}
+    </select>
+
+</mapper>
+
+
