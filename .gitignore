@@ -62,3 +62,7 @@ docs/archive/
 # 以下文件仍应被版本管理：
 #   package-lock.json、pom.xml、mvnw、.mvn/wrapper/*
 #   backend/src/main/resources/application.yml（含原项目连接信息，公开前需先脱敏）
+
+# 数据导入目录（/import_data 只允许读取此目录内的 .csv）
+# 目录由 ImportPathGuard 在首次调用时自动创建，不入库；按目录名匹配任意层级。
+import-data/

@@ -1,6 +1,7 @@
 package com.example.springboot.security;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Service;
@@ -42,12 +43,19 @@ public class TokenRevocationService {
     purgeExpired();
   }
 
-  /** 吊销某个身份在 {@code now} 之前签发的所有令牌（修改密码后调用）。 */
+  /**
+   * 吊销某个身份在 {@code now} 之前签发的所有令牌（修改密码后调用）。
+   *
+   * <p>时间点会被<b>截断到秒</b>：JWT 的 {@code iat} 精度只有秒，若这里保留纳秒，
+   * 那么“改密后同一秒内重新登录”拿到的新令牌，其 {@code iat}（xx.000）会小于切点
+   * （xx.4xx）而被误判为已吊销。截断后语义变为“早于切点所在秒签发的令牌失效”，
+   * 代价是同一秒内签发的旧令牌最多多存活 1 秒（短有效期内可接受）。
+   */
   public void revokeAllIssuedBefore(String identity) {
     if (identity == null || identity.isBlank()) {
       return;
     }
-    revokeBeforeByIdentity.put(identity, Instant.now());
+    revokeBeforeByIdentity.put(identity, Instant.now().truncatedTo(ChronoUnit.SECONDS));
   }
 
   /**
@@ -63,7 +71,11 @@ public class TokenRevocationService {
       return true;
     }
     Instant cut = revokeBeforeByIdentity.get(principal.identity());
-    return cut != null && principal.issuedAt() != null && principal.issuedAt().isBefore(cut);
+    if (cut == null || principal.issuedAt() == null) {
+      return false;
+    }
+    // 严格早于切点所在秒才算吊销：同一秒内新签发的令牌必须可用。
+    return principal.issuedAt().truncatedTo(ChronoUnit.SECONDS).isBefore(cut);
   }
 
   /** 清理已自然过期的吊销记录，避免内存无界增长。 */

@@ -3,15 +3,25 @@ package com.example.springboot.service;
 import com.example.springboot.dao.EntityManageMapper;
 import com.example.springboot.dao.RelationManageMapper;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * CSV 导入。
+ *
+ * <p>安全相关的改动只在“如何取到文件”这一步：路径必须由
+ * {@link com.example.springboot.security.ImportPathGuard} 先解析校验，本类只接受已经
+ * 确认落在允许目录内的 {@link Path}，不再接收任意字符串路径。
+ *
+ * <p>另外去掉了原来逐行 {@code System.out.println(everyLine)} 的调试打印 ——
+ * 那会把被导入文件的<b>全文写进服务端日志</b>，是实际的敏感信息泄露面。
+ */
 @Service
 public class CsvService {
 
@@ -28,7 +38,6 @@ public class CsvService {
     String[] entity = line.split(",");
     for (int i = 0 ; i < entity.length ; i ++) {
       entity[i] = entity[i].trim();
-      // System.out.println(entity[i]);
     }
     String label = entity[2];
     String name = entity[1];
@@ -40,37 +49,29 @@ public class CsvService {
     String[] entity = line.split("\t");
     for (int i = 0 ; i < entity.length ; i ++) {
       entity[i] = entity[i].trim();
-      // System.out.println(entity[i]);
     }
-
+    // 说明：关系导入的落库逻辑在原项目中即为空实现，本轮不扩展功能，
+    // 因此这里只做行解析，不写入数据库（详见 FINAL_DELIVERY_REPORT 的已知限制）。
   }
 
-  public void handleCsv(String path) {
-    // 1. .csv文件的路径。注意只有一个\的要改成\\
-    // path = "E:\\桌面\\团队项目\\entity.csv";
-    File csv = new File(path);
-    BufferedReader br = null;
-    try {
-      br = new BufferedReader(new FileReader(csv));
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    }
-    String line = "";
-    String everyLine = "";
-    try {
-      List<String> allString = new ArrayList<>();
-      // 读取到的内容给line变量
+  /**
+   * 读取并逐行解析 CSV。
+   *
+   * @param csvPath 已经过安全校验的文件路径
+   * @return 读取到的行数
+   */
+  public int handleCsv(Path csvPath) {
+    List<String> allString = new ArrayList<>();
+    try (BufferedReader br = Files.newBufferedReader(csvPath, StandardCharsets.UTF_8)) {
+      String line;
       while ((line = br.readLine()) != null) {
-        everyLine = line;
-        System.out.println(everyLine);
-        // importEntity(everyLine);
-        importRelation(everyLine);
-        allString.add(everyLine);
+        allString.add(line);
+        importRelation(line);
       }
-      System.out.println("csv表格中所有行数：" + allString.size());
     } catch (IOException e) {
-      e.printStackTrace();
+      throw new IllegalArgumentException("导入文件读取失败：" + e.getClass().getSimpleName());
     }
+    return allString.size();
   }
 
 }
