@@ -1,5 +1,7 @@
 package com.example.springboot.controller;
 
+import com.example.springboot.security.AuthContext;
+
 import com.example.springboot.service.LogManageService;
 import com.example.springboot.service.RelationManageService;
 import com.example.springboot.tools.EntityAndRelation;
@@ -26,7 +28,7 @@ public class RelationManageController {
   @RequestMapping(value = "/add_relation", method = RequestMethod.POST)
   public EntityAndRelation addRelation(@RequestBody Map map, HttpServletRequest request,
       HttpSession session) {
-    String account = map.get("account").toString();
+    String account = AuthContext.identity();
     String startLabel = map.get("startLabel").toString();
     String startName = map.get("startName").toString();
     String endLabel = map.get("endLabel").toString();
@@ -48,7 +50,7 @@ public class RelationManageController {
   @RequestMapping(value = "/remove_relation", method = RequestMethod.POST)
   public boolean removeRelation(@RequestBody Map map, HttpServletRequest request,
       HttpSession session) {
-    String account = map.get("account").toString();
+    String account = AuthContext.identity();
     int startEntity = Integer.parseInt(map.get("startEntityId").toString());
     int endEntity = Integer.parseInt(map.get("endEntityId").toString());
     String label = map.get("label").toString();
@@ -61,7 +63,7 @@ public class RelationManageController {
   @RequestMapping(value = "/change_relation", method = RequestMethod.POST)
   public EntityAndRelation changeRelation(@RequestBody Map map, HttpServletRequest request,
       HttpSession session) {
-    String account = map.get("account").toString();
+    String account = AuthContext.identity();
     int startEntity = Integer.parseInt(map.get("startEntityId").toString());
     int endEntity = Integer.parseInt(map.get("endEntityId").toString());
     String oldLabel = map.get("oldLabel").toString();

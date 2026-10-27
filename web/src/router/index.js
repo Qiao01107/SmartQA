@@ -23,7 +23,9 @@ const routes = [
             {
                 path: '/AdminManage',
                 component: () => import('../components/page/AdminManage.vue'),
-                meta: { title: '管理员管理' }
+                // 前端角色标记仅用于体验（提前跳 403）；后端 /add_web_user 等接口
+                // 已限定 ROLE_SUPER_ADMIN，普通管理员即使手改路由也拿不到数据。
+                meta: { title: '管理员管理', roles: ['1'] }
             },
             {
                 path: '/404',

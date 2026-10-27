@@ -132,6 +132,10 @@ DB_PASSWORD=你的MySQL密码
 NEO4J_URI=bolt://127.0.0.1:7687
 NEO4J_USER=neo4j
 NEO4J_PASSWORD=你的Neo4j密码
+
+# ---------- JWT 鉴权（本轮新增，必填） ----------
+JWT_SECRET=至少32字节的随机字符串（openssl rand -base64 48）
+JWT_TTL_MINUTES=30
 INIT_ADMIN_ACCOUNT=admin
 INIT_ADMIN_PASSWORD=你的初始管理员密码
 INIT_ADMIN_NAME=超级管理员
@@ -139,6 +143,9 @@ INIT_ADMIN_PHONE=13800000000
 ```
 
 > ⚠️ `.env` 已被 `.gitignore` 排除，**禁止提交**；`.env.example` 是模板，可提交。
+> 🔐 `JWT_SECRET` 是后端登录令牌的签名密钥，泄露等于任何人都能伪造登录态。
+> 🔐 初始管理员密码需 **≥8 位且同时包含字母和数字**，否则初始化器不会创建账号（fail-closed）；
+>    系统**不再接受** `admin`/`admin` 这类默认弱口令。
 
 ---
 
@@ -177,7 +184,7 @@ java -jar target/springboot-0.0.1-SNAPSHOT.jar --server.port=8081
 curl -X POST http://127.0.0.1:8081/web_login \
   -H "Content-Type: application/json" \
   -d '{"account":"admin","password":"你的密码","type":"1"}'
-# 预期：{"success":true,"user":{...}}
+  # 预期：{"success":true,"token":"<jwt 三段式>","user":{...}}
 ```
 
 ---

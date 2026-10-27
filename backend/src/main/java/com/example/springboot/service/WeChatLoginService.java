@@ -37,6 +37,19 @@ public class WeChatLoginService {
     return 2;
   }
 
+  /** 按手机号查询小程序用户（登录成功后回填用户信息、以及数据归属校验时使用）。 */
+  public WeChatUsers findByPhone(String phone) {
+    if (phone == null) {
+      return null;
+    }
+    for (WeChatUsers user : weChatLoginMapper.findUsers()) {
+      if (phone.equals(user.getPhone())) {
+        return user;
+      }
+    }
+    return null;
+  }
+
   // 注册：密码以 BCrypt 哈希落库
   public boolean register(String wechatName, String phone, String profile_picture,
       String password) {

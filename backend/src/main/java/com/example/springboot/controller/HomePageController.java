@@ -1,5 +1,7 @@
 package com.example.springboot.controller;
 
+import com.example.springboot.security.AuthContext;
+
 import com.example.springboot.entity.WebUsers;
 import com.example.springboot.service.HomePageService;
 import java.util.Map;
@@ -20,14 +22,14 @@ public class HomePageController {
   @RequestMapping(value = "/get_admin_info", method = RequestMethod.POST)
   public WebUsers getAdminInfo(@RequestBody Map map, HttpServletRequest request,
       HttpSession session) {
-    String account = map.get("account").toString();
+    String account = AuthContext.identity();
     return homePageService.getAdminInfo(account);
   }
 
   @RequestMapping(value = "/last_login", method = RequestMethod.POST)
   public String lastLogin(@RequestBody Map map, HttpServletRequest request,
       HttpSession session) {
-    String account = map.get("account").toString();
+    String account = AuthContext.identity();
     return homePageService.lastLoginTime(account);
   }
 
@@ -35,7 +37,7 @@ public class HomePageController {
   public boolean changeHeadPortrait(@RequestBody Map map, HttpServletRequest request,
       HttpSession session) {
     String headNumber = map.get("head").toString();
-    String account = map.get("account").toString();
+    String account = AuthContext.identity();
     return homePageService.changeHead(headNumber, account);
   }
 

@@ -1,5 +1,7 @@
 package com.example.springboot.controller;
 
+import com.example.springboot.security.AuthContext;
+
 import com.example.springboot.entity.WeChatUsers;
 import com.example.springboot.service.LogManageService;
 import com.example.springboot.service.WeChatManageService;
@@ -27,7 +29,7 @@ public class WeChatManageController {
   @RequestMapping(value = "/disable_user", method = RequestMethod.POST)
   public boolean disableUser(@RequestBody Map map, HttpServletRequest request,
       HttpSession session) {
-    String account = map.get("account").toString();
+    String account = AuthContext.identity();
     String cause = "";
     if (map.get("cause") != null) {
       cause = map.get("cause").toString();
@@ -41,7 +43,7 @@ public class WeChatManageController {
   @RequestMapping(value = "/able_user", method = RequestMethod.POST)
   public boolean ableUser(@RequestBody Map map, HttpServletRequest request,
       HttpSession session) {
-    String account = map.get("account").toString();
+    String account = AuthContext.identity();
     String phone = map.get("phone").toString();
     logManageService.recordOperation(account, "取消禁用微信用户" + phone,
         "able_user", "true");

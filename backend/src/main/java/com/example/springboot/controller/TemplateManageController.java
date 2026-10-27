@@ -1,5 +1,7 @@
 package com.example.springboot.controller;
 
+import com.example.springboot.security.AuthContext;
+
 import com.example.springboot.entity.QuestionTemplate;
 import com.example.springboot.service.LogManageService;
 import com.example.springboot.service.TemplateManageService;
@@ -26,7 +28,7 @@ public class TemplateManageController {
   @RequestMapping(value = "/add_template", method = RequestMethod.POST)
   public boolean addTemplate(@RequestBody Map map, HttpServletRequest request,
       HttpSession session) {
-    String account = map.get("account").toString();
+    String account = AuthContext.identity();
     String template = map.get("questionTemplate").toString();
     String question = map.get("preciseQuestion").toString();
     boolean status = templateManageService.addTemplate(template, question);
@@ -43,7 +45,7 @@ public class TemplateManageController {
   @RequestMapping(value = "/remove_template", method = RequestMethod.POST)
   public boolean removeTemplate(@RequestBody Map map, HttpServletRequest request,
       HttpSession session) {
-    String account = map.get("account").toString();
+    String account = AuthContext.identity();
     String template = map.get("questionTemplate").toString();
     logManageService.recordOperation(account, "删除问题模板",
         "remove_template", "true");
@@ -53,7 +55,7 @@ public class TemplateManageController {
   @RequestMapping(value = "/change_template", method = RequestMethod.POST)
   public boolean changeTemplate(@RequestBody Map map, HttpServletRequest request,
       HttpSession session) {
-    String account = map.get("account").toString();
+    String account = AuthContext.identity();
     int questionId = Integer.parseInt(map.get("questionId").toString());
     String oldTemplate = map.get("oldTemplate").toString();
     String newTemplate = map.get("newTemplate").toString();

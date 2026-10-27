@@ -1,4 +1,5 @@
 const { baseUrl } = require('../../utils/config.js');
+const { request } = require('../../utils/request.js');
 
 Page({
     data: {
@@ -22,7 +23,7 @@ Page({
     },
     onLoad: function (options) {
       var that = this;
-      wx.request({
+      request({
         url: baseUrl + '/wechat_feedbackView',
         data: {
           phone: getApp().globalData.phone
@@ -109,7 +110,7 @@ Page({
         });
         return;
       }
-      wx.request({
+      request({
         url: baseUrl + '/wechat_feedback',
       data:{
         phone: getApp().globalData.phone,
@@ -130,7 +131,6 @@ Page({
             success: function (res) { }
             })
             else if(res.data == true){
-              getApp().globalData.userInfo_detail = res.data.data
               wx.showModal({
               title: '恭喜！',
               showCancel: false,

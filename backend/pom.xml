@@ -15,6 +15,7 @@
     <description>example</description>
     <properties>
         <java.version>21</java.version>
+        <jjwt.version>0.12.6</jjwt.version>
     </properties>
     <dependencies>
         <dependency>
@@ -83,10 +84,35 @@
             <version>5.28.15</version>
         </dependency>
 
-        <!-- 仅密码加密（BCrypt），不引入完整 Spring Security 框架。 -->
+        <!-- Spring Security 6（版本由 Spring Boot 3.5 BOM 统一管理），提供统一认证/授权。 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <!-- BCrypt 密码哈希（随 starter-security 传递引入，此处显式声明以便阅读） -->
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-crypto</artifactId>
+        </dependency>
+
+        <!-- JWT（HS256 签名 + 有效期校验）。api 编译期，impl/jackson 运行期。 -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>${jjwt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
         </dependency>
 
         <dependency>

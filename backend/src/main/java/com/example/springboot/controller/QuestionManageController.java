@@ -1,5 +1,7 @@
 package com.example.springboot.controller;
 
+import com.example.springboot.security.AuthContext;
+
 import com.example.springboot.entity.Question;
 import com.example.springboot.service.LogManageService;
 import com.example.springboot.service.QuestionManageService;
@@ -26,7 +28,7 @@ public class QuestionManageController {
   @RequestMapping(value = "/add_question", method = RequestMethod.POST)
   public boolean addQuestion(@RequestBody Map map, HttpServletRequest request,
       HttpSession session) {
-    String account = map.get("account").toString();
+    String account = AuthContext.identity();
     String question = map.get("question").toString();
     boolean status;
     if (map.get("answer") != null) {
@@ -48,7 +50,7 @@ public class QuestionManageController {
   @RequestMapping(value = "/remove_question", method = RequestMethod.POST)
   public boolean removeQuestion(@RequestBody Map map, HttpServletRequest request,
       HttpSession session) {
-    String account = map.get("account").toString();
+    String account = AuthContext.identity();
     String question = map.get("question").toString();
     boolean status = questionManageService.removeQuestion(question);
     if (status) {
@@ -64,7 +66,7 @@ public class QuestionManageController {
   @RequestMapping(value = "/insist_remove_question", method = RequestMethod.POST)
   public boolean insistRemoveQuestion(@RequestBody Map map, HttpServletRequest request,
       HttpSession session) {
-    String account = map.get("account").toString();
+    String account = AuthContext.identity();
     String question = map.get("question").toString();
     logManageService.recordOperation(account, "删除问题" + question,
         "insist_remove_question", "true");
@@ -74,7 +76,7 @@ public class QuestionManageController {
   @RequestMapping(value = "/change_question", method = RequestMethod.POST)
   public String changeQuestion(@RequestBody Map map, HttpServletRequest request,
       HttpSession session) {
-    String account = map.get("account").toString();
+    String account = AuthContext.identity();
     int questionId = Integer.parseInt(map.get("questionId").toString());
     String newQuestion = map.get("newQuestion").toString();
     String reply = questionManageService.changeQuestion(questionId, newQuestion);
@@ -91,7 +93,7 @@ public class QuestionManageController {
   @RequestMapping(value = "/insist_change_question", method = RequestMethod.POST)
   public boolean insistChangeQuestion(@RequestBody Map map, HttpServletRequest request,
       HttpSession session) {
-    String account = map.get("account").toString();
+    String account = AuthContext.identity();
     int questionId = Integer.parseInt(map.get("questionId").toString());
     String newQuestion = map.get("newQuestion").toString();
     logManageService.recordOperation(account, "修改问题" + questionId,
@@ -102,7 +104,7 @@ public class QuestionManageController {
   @RequestMapping(value = "/change_answer", method = RequestMethod.POST)
   public boolean changeAnswer(@RequestBody Map map, HttpServletRequest request,
       HttpSession session) {
-    String account = map.get("account").toString();
+    String account = AuthContext.identity();
     int questionId = Integer.parseInt(map.get("questionId").toString());
     logManageService.recordOperation(account, "修改问题" + questionId + "的答案",
         "change_answer", "true");

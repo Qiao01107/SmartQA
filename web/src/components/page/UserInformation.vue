@@ -17,7 +17,7 @@
                             <el-input v-model="userInformation.account" disabled></el-input>
                         </el-form-item>
                         <el-form-item label="密码:" label-width="80px" style="margin-top: 30px">
-                            <el-input v-model="userInformation.password"></el-input>
+                            <el-input v-model="userInformation.password" placeholder="留空表示不修改；修改需至少 8 位且含字母和数字"></el-input>
                         </el-form-item>
                         <el-form-item label="手机号:" label-width="80px" style="margin-top: 30px">
                             <el-input v-model="userInformation.phone" oninput="value=value.replace(/[^\d]/g,'')" maxlength="11"></el-input>
@@ -63,15 +63,39 @@ export default {
                     .post('/api/change_self_info', {
                         phone: this.userInformation.phone,
                         email: this.userInformation.email,
-                        password: this.userInformation.password,
+                        // 留空表示不修改密码；填写则至少 8 位且含字母和数字。
+                        password: this.userInformation.password || '',
                         account: this.userInformation.account
                     })
-                    .then(() => {
-                        that.$message({
-                            message: '修改信息成功',
-                            type: 'success'
-                        });
-                        store.commit('setUserinfomation', that.userInformation);
+                    .then(response => {
+                        const body = response.data || {};
+                        if (!body.success) {
+                            that.$message({
+                                message: body.message || '保存失败',
+                                type: 'error'
+                            });
+                            return;
+                        }
+                        // 前端状态不保留密码字段。
+                        const saved = Object.assign({}, that.userInformation);
+                        delete saved.password;
+                        store.commit('setUserinfomation', saved);
+                        that.userInformation = Object.assign({}, saved);
+
+                        if (body.passwordChanged) {
+                            // 改密后服务端已吊销旧令牌，必须重新登录。
+                            that.$message({
+                                message: body.message || '密码已更新，请重新登录',
+                                type: 'success'
+                            });
+                            store.commit('clearLogin');
+                            that.$router.push('/login');
+                        } else {
+                            that.$message({
+                                message: body.message || '修改信息成功',
+                                type: 'success'
+                            });
+                        }
                     });
             }
         },

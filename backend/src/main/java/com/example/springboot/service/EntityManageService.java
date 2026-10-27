@@ -47,11 +47,19 @@ public class EntityManageService {
     }
   }
 
-  public String insistRemoveEntity(String account, int id) {
-    WebUsers webUser = adminManageMapper.searchWebUser(account);
+  /** 因角色不足被拒绝时返回的固定文案（控制器据此记录审计日志）。 */
+  public static final String DENIED_BY_ROLE = "该管理员无权删除该实体！";
+
+  /**
+   * 强制删除实体及其全部关系。
+   *
+   * @param superAdmin 当前登录者是否为超级管理员——由令牌中的角色声明传入，
+   *                   不再根据请求体里的 account 到库里查 adminType（旧实现可被伪造）
+   */
+  public String insistRemoveEntity(boolean superAdmin, int id) {
     int relationNumber = neo4jService.countRelation(id);
-    if (webUser.getAdminType() == '0' && relationNumber > 5) {
-      return "该管理员无权删除该实体！";
+    if (!superAdmin && relationNumber > 5) {
+      return DENIED_BY_ROLE;
     } else {
       // 先删除所有关系
       neo4jService.deleteAllRelation(id);

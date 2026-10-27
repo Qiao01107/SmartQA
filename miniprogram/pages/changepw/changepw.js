@@ -1,5 +1,6 @@
 // pages/changepw/changepw.js
 const { baseUrl } = require('../../utils/config.js');
+const { request } = require('../../utils/request.js');
 
 Page({
 
@@ -47,7 +48,7 @@ Page({
             })
           }
           else {
-            wx.request({
+            request({
                     url: baseUrl + '/wechat_change_password',
                   data:{
                     phone: getApp().globalData.phone,
@@ -59,35 +60,30 @@ Page({
                         "Content-Type": "application/json"
                       },
                       success: function (res) {
-                        console.log(res.data)
-                        if(res.data == false)
-                        wx.showModal({
-                        title: '提示！',
-                        showCancel: false,
-                        content: '旧密码错误！',
-                        success: function (res) { }
-                        })
-                        else if(res.data == true){
-                          getApp().globalData.userInfo_detail = res.data.data
+                        var body = res.data || {};
+                        if (body.success === false) {
                           wx.showModal({
-                          title: '恭喜！',
-                          showCancel: false,
-                          content: '修改密码成功',
-                          success: function (res){
-                            if (res.confirm) {
-                              console.log('用户点击确定')
-                            } else if (res.cancel) {
-                              console.log('用户点击取消')
+                            title: '提示！',
+                            showCancel: false,
+                            content: body.message || '修改失败'
+                          })
+                        } else if (body.success === true) {
+                          // 改密后后端已吊销此前所有令牌，必须重新登录。
+                          wx.showModal({
+                            title: '恭喜！',
+                            showCancel: false,
+                            content: body.message || '修改密码成功，请重新登录',
+                            complete: function () {
+                              require('../../utils/request.js').clearAuth();
+                              getApp().globalData.phone = null;
+                              getApp().globalData.userInfo = null;
+                              wx.reLaunch({
+                                url: "/pages/login/login"
+                              })
                             }
-                          },
-                          complete: function (res) {
-                            wx.reLaunch({
-                              url: "/pages/user/user"
-                            })
-                          }
-                        })
-                      }
-                    },
+                          })
+                        }
+                      },
                     fail: function (res) {
                       wx.showModal({
                         title: '哎呀～',

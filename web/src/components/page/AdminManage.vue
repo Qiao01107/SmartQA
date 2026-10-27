@@ -86,7 +86,7 @@
                     <el-input v-model="addForm.phone" oninput="value=value.replace(/[^\d]/g,'')" maxlength="11"></el-input>
                 </el-form-item>
                 <el-form-item label="管理员密码" prop="password">
-                    <el-input type="password" placeholder="password" v-model="addForm.password"></el-input>
+                    <el-input type="password" placeholder="至少 8 位，需包含字母和数字" v-model="addForm.password"></el-input>
                 </el-form-item>
                 <el-form-item label="确认管理员密码" prop="againPassword">
                     <el-input type="password" placeholder="againPassword" v-model="addForm.againPassword"></el-input>
@@ -225,7 +225,6 @@ export default {
             } else {
                 this.$axios
                     .post('/api/change_web_user', {
-                        operatorAccount: that.account,
                         account: this.form.account,
                         phone: that.form.phone,
                         adminType: that.form.adminType
@@ -251,14 +250,22 @@ export default {
                 .then(() => {
                     that.$axios
                         .post('/api/remove_web_user', {
-                            account: e.account,
-                            operatorAccount: that.account
+                            account: e.account
                         })
-                        .then(() => {
-                            that.$message({
-                                message: '删除成功',
-                                type: 'success'
-                            });
+                        .then(response => {
+                            if (response.data === true) {
+                                that.$message({
+                                    message: '删除成功',
+                                    type: 'success'
+                                });
+                            } else {
+                                // 常见原因：该管理员已产生操作日志（外键 RESTRICT 保护），
+                                // 或试图删除自己、或试图删除最后一个超级管理员。
+                                that.$message({
+                                    message: '删除失败：该账号存在关联日志，或不允许删除自己/最后一个超级管理员',
+                                    type: 'error'
+                                });
+                            }
                             that.handleRefresh();
                         });
                 })
@@ -287,8 +294,7 @@ export default {
                         account: that.addForm.account,
                         password: that.addForm.password,
                         phone: that.addForm.phone,
-                        adminType: that.addForm.adminType.toString(),
-                        operatorAccount: that.account
+                        adminType: that.addForm.adminType.toString()
                     })
                     .then(function(response) {
                         if (response.data == true) {
@@ -299,7 +305,7 @@ export default {
                             that.addVisible = false;
                         } else {
                             that.$message({
-                                message: '新增管理员失败',
+                                message: '新增管理员失败：账号可能已存在，或密码不满足“至少 8 位且含字母和数字”',
                                 type: 'error'
                             });
                         }

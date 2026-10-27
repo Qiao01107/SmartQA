@@ -1,5 +1,6 @@
 // pages/user/history/history.js
 const { baseUrl } = require('../../utils/config.js');
+const { request } = require('../../utils/request.js');
 
 var app = getApp()
 Page({
@@ -16,7 +17,7 @@ Page({
    */
   onLoad: function (options) {
     var that = this;
-    wx.request({
+    request({
       url: baseUrl + '/wechat_chatting',
       data: {
         phone: getApp().globalData.phone
@@ -39,7 +40,7 @@ Page({
     var question =e.currentTarget.dataset.question;
     var answer;
     var that = this 
-      wx.request({
+      request({
       url: baseUrl + '/apart',
     data:{
       text: question,
@@ -66,7 +67,7 @@ Page({
       success: function (res){
         if (res.confirm) {
           console.log('用户点击确定')
-          wx.request({
+          request({
             url: baseUrl + '/clearHistory',
             data: {
               phone: getApp().globalData.phone

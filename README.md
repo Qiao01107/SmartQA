@@ -121,9 +121,15 @@ cp .env.example .env
 | --- | --- | --- |
 | `DB_USER` / `DB_PASSWORD` | MySQL 账号/密码 | 是 |
 | `NEO4J_URI` / `NEO4J_USER` / `NEO4J_PASSWORD` | Neo4j 连接 | 是 |
-| `INIT_ADMIN_ACCOUNT` / `INIT_ADMIN_PASSWORD` | 初始超级管理员（仅表为空时创建） | 否 |
+| `JWT_SECRET` | 后端鉴权签名密钥，**至少 32 字节**（泄露=可伪造任意登录令牌） | **是（生产必须）** |
+| `JWT_TTL_MINUTES` | 令牌有效期（分钟），默认 30，上限 120 | 否 |
+| `INIT_ADMIN_ACCOUNT` / `INIT_ADMIN_PASSWORD` | 初始超级管理员（仅表为空时创建，密码需 ≥8 位且含字母数字） | 否 |
+| `CORS_ALLOWED_ORIGINS` | 允许跨域的前端源，逗号分隔 | 否 |
 | `XFYUN_API_KEY` / `XFYUN_API_SECRET` | 讯飞语音（可选） | 否 |
-| `ZHENZI_SMS_APP_ID` / `ZHENZI_SMS_APP_SECRET` | 榛子云短信（可选） | 否 |
+| `ZHENZI_SMS_APP_ID` / `ZHENZI_SMS_APP_SECRET` | 榛子云短信（可选，未配置时"忘记密码"不可用） | 否 |
+
+> `JWT_SECRET` 生成方式：`openssl rand -base64 48` 或 `python -c "import secrets;print(secrets.token_urlsafe(48))"`。
+> 未配置时后端仍能启动，但会打印 WARN 并生成**一次性随机密钥**——进程重启后所有令牌立即失效，仅可用于本地临时调试。
 
 ---
 
@@ -132,18 +138,18 @@ cp .env.example .env
 ### 5.1 后端（端口 8081）
 
 ```bash
-# 方式一：启动脚本（自动加载 .env）
+# 方式一：启动脚本（自动加载 .env，推荐）
 start-backend.bat
 
-# 方式二：手动（Linux/macOS 用 export，Windows 用 set）
+# 方式二：手动（先导出 .env 中的变量，再运行 jar）
 cd backend
-DB_PASSWORD=... NEO4J_PASSWORD=... \
-  INIT_ADMIN_ACCOUNT=admin INIT_ADMIN_PASSWORD=admin \
-  java -jar target/springboot-0.0.1-SNAPSHOT.jar --server.port=8081
+java -jar target/springboot-0.0.1-SNAPSHOT.jar --server.port=8081
 ```
 
-> 首次启动时，若 `web_user` 表为空，`AdminInitializer` 会用 `INIT_ADMIN_ACCOUNT`/`INIT_ADMIN_PASSWORD` 自动创建初始超级管理员（默认 `admin`/`admin`）。
-> 密码以 **BCrypt 哈希**落库（不保存明文）；重复启动不会覆盖已有账号或重置密码。
+> **初始管理员**：仅当 `web_user` 表为空时，`AdminInitializer` 才会用 `INIT_ADMIN_ACCOUNT`/`INIT_ADMIN_PASSWORD` 创建超级管理员。
+> 密码以 **BCrypt 哈希**落库；重复启动不会覆盖已有账号、不会重置密码。
+> **不再提供 `admin`/`admin` 这类默认弱口令**：未配置或密码不满足「≥8 位且含字母和数字」时，
+> 初始化器只记录 ERROR 日志并跳过创建（fail-closed），请在启动日志中确认结果。
 
 ### 5.2 前端（端口 8080）
 
@@ -188,7 +194,7 @@ mysql -uroot -p smartques < database/dev-test-data.sql
 | Neo4j 5.26 bolt 连接 + 读写 | ✅ PASS |
 | 超级管理员登录（adminType='1'） | ✅ PASS |
 | 普通管理员登录（adminType='0'） | ✅ PASS |
-| 登录失败明确响应（HTTP 200 + success:false） | ✅ PASS |
+| 登录失败明确响应（HTTP 401 + JSON） | ✅ PASS |
 | 管理员增删改查 + 角色筛选 | ✅ PASS |
 | 实体增删查（bid 业务主键） | ✅ PASS |
 | 关系增删查 | ✅ PASS |
@@ -198,6 +204,10 @@ mysql -uroot -p smartques < database/dev-test-data.sql
 | 前端构建（Vite 7） | ✅ PASS |
 | 前端 dev server + /api 代理 | ✅ PASS |
 | 小程序 11 页面 JS 语法检查 | ✅ PASS |
+| **后端鉴权：未登录访问敏感接口 → 401** | ✅ PASS（72 项端到端用例全通过） |
+| **后端鉴权：普通管理员调超管接口 → 403** | ✅ PASS |
+| **后端鉴权：小程序用户跨用户读取 → 403** | ✅ PASS |
+| **令牌篡改 / 过期 / 退出后重放 → 401** | ✅ PASS |
 
 详见 `docs/TEST_REPORT.md`。
 
@@ -214,17 +224,38 @@ mysql -uroot -p smartques < database/dev-test-data.sql
 
 ---
 
-## 九、已知限制
+## 九、认证与鉴权（Phase Security-1）
 
-- 密码已改为 **BCrypt 哈希**存储（`web_user` / `wechat_users` 均适用），不再明文保存。字段已扩容至 `varchar(100)`。
-- 前端登录 token 为本地会话标记（`session-<时间戳>`），后端暂未实现服务端会话鉴权。
-- 管理员管理接口未做服务端权限校验（仅前端按 `adminType` 控制菜单可见性）。
+> 详细设计见 `docs/SECURITY_FIX_REPORT.md`，接口级权限见 `docs/API_PERMISSION_MATRIX.md`，测试证据见 `docs/SECURITY_TEST_REPORT.md`。
+
+- **统一认证**：Spring Security 6 + 服务端签发的 **JWT（HS256，默认 30 分钟）**，Vue 管理端与微信小程序共用同一套令牌。
+- **角色模型**：`adminType='1'` → `ROLE_SUPER_ADMIN`（同时持有 `ROLE_ADMIN`）；`adminType='0'` → `ROLE_ADMIN`；小程序用户 → `ROLE_WECHAT_USER`。
+- **默认拒绝**：79 个接口中仅 5 个允许匿名（登录、注册、找回密码），未在 `SecurityConfig` 登记的路径一律 403。
+- **401 / 403 语义**：未登录或令牌无效 → 401；已登录但角色不足 → 403，均为 JSON 响应。
+- **防越权**：身份只从令牌取；请求体里的 `account` / `phone` 只用于一致性校验，不一致直接 403。
+- **退出登录**：调用 `/web_logout` / `/wechat_logout` 吊销当前令牌 jti；修改密码会吊销该账号此前所有令牌。
+- **凭证传递**：只用 `Authorization: Bearer`，不使用 Cookie/Session，因此 CSRF 不适用（若改为 Cookie 必须同时开启 CSRF）。
+
+已知边界（不夸大）：
+
+- 吊销表保存在**单实例内存**，重启或多实例部署后失效，此时令牌仅受 30 分钟有效期约束；
+- 未实现登录失败次数限制（暴力破解防护）；
+- 全链路需部署 HTTPS 后才可对公网开放。
+
+---
+
+## 十、已知限制
+
+- 密码已改为 **BCrypt 哈希**存储（`web_user` / `wechat_users` 均适用），字段已扩容至 `varchar(100)`；接口响应通过 `@JsonIgnore` 不回传密码。
+- 管理员**初始凭据不再允许弱口令**：`AdminInitializer` 要求 `INIT_ADMIN_PASSWORD` 至少 8 位且含字母和数字，否则不创建账号（fail-closed）。**既有 `admin` 账号仍使用早期口令，请在「个人信息」页改成强口令。**
+- 管理员删除受 `log` 表外键 `ON DELETE RESTRICT` 约束：已产生操作日志的管理员无法删除（接口返回 `false`），属数据完整性保护。
+- 找回密码依赖榛子云短信；未配置时服务端 **fail-closed**（不签发验证码），该功能不可用。
 - HanLP 使用内置词典（标准分词），未使用感知机大模型（portable 版不含）。
 - `fuzzyWords.txt` 模糊词表未提供（问答流程会跳过模糊词替换，不影响主链路）。
 
 ---
 
-## 十、Git 与团队协作
+## 十一、Git 与团队协作
 
 - 分支策略：在 `feature/modernization` 分支提交变更，**不直接覆盖 main，不强制推送**；
 - 构建产物与敏感文件已通过 `.gitignore` 排除（`target/`、`dist/`、`node_modules/`、`.env`、日志、备份等）；

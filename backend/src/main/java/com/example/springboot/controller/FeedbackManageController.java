@@ -1,5 +1,7 @@
 package com.example.springboot.controller;
 
+import com.example.springboot.security.AuthContext;
+
 import com.example.springboot.entity.FeedbackUsers;
 import com.example.springboot.entity.WeChatUsers;
 import com.example.springboot.service.FeedbackManageService;
@@ -34,7 +36,7 @@ public class FeedbackManageController {
   @RequestMapping(value = "/change_feedback", method = RequestMethod.POST)
   public boolean changeFeedback(@RequestBody Map map, HttpServletRequest request,
       HttpSession session) {
-    String account = map.get("account").toString();
+    String account = AuthContext.identity();
     String phone = map.get("phone").toString();
     String opinion = map.get("opinion").toString();
     String question = map.get("question").toString();

@@ -61,8 +61,14 @@ export default {
         // 用户名下拉菜单选择事件
         handleCommand(command) {
             if (command == 'loginout') {
-                store.commit('clearLogin');
-                this.$router.push('/login');
+                // 先请求后端吊销令牌，再清理本地状态；即使请求失败也照常退出本地。
+                this.$axios
+                    .post('/api/web_logout')
+                    .catch(() => {})
+                    .finally(() => {
+                        store.commit('clearLogin');
+                        this.$router.push('/login');
+                    });
             } else if (command == 'changeInformation') {
                 this.$router.push('/userInformation');
             }

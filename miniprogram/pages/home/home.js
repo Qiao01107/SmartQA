@@ -1,6 +1,7 @@
 // pages/community/community.js
 //ll
 const { baseUrl } = require('../../utils/config.js');
+const { request } = require('../../utils/request.js');
 
 const app = getApp();
 var inputVal = '';
@@ -119,7 +120,7 @@ Page({
    */
   sendClick: function (e) {
     var that = this
-    wx.request({ //发送问题接收回答
+    request({ //发送问题接收回答
 
       url: baseUrl + '/apart',
       data: {
@@ -135,7 +136,7 @@ Page({
             answer: res.data
           })
 
-          wx.request({ //如果回答返回成功，则开始判断该问答是否被收藏
+          request({ //如果回答返回成功，则开始判断该问答是否被收藏
             url: baseUrl + '/get_collectible',
             data: {
               phone: getApp().globalData.phone,
@@ -196,7 +197,7 @@ Page({
       }
     })
 
-    wx.request({
+    request({
       url: baseUrl + '/add_chatting',
       data: {
         phone: getApp().globalData.phone,
@@ -243,7 +244,7 @@ Page({
     })
     var that = this;
     
-    wx.request({
+    request({
       url: baseUrl + '/get_collectible',
       data: {
         phone: getApp().globalData.phone,
@@ -293,7 +294,7 @@ Page({
     })
     
    
-    wx.request({
+    request({
       url: baseUrl + '/add_chatting',
       data: {
         phone: getApp().globalData.phone,
@@ -330,7 +331,7 @@ sethotnum1() {
       hotnum: 1
     })
     var that = this;
-    wx.request({
+    request({
       url: baseUrl + '/get_collectible',
       data: {
         phone: getApp().globalData.phone,
@@ -378,7 +379,7 @@ sethotnum1() {
       }
     })
 
-  wx.request({
+  request({
     url: baseUrl + '/add_chatting',
     data: {
       phone: getApp().globalData.phone,
@@ -415,7 +416,7 @@ sethotnum1() {
       hotnum: 2
     })
     var that = this;
-    wx.request({
+    request({
       url: baseUrl + '/get_collectible',
       data: {
         phone: getApp().globalData.phone,
@@ -462,7 +463,7 @@ sethotnum1() {
         console.log('发送时iscollected的值为'+that.data.isCollected)
       }
     })
-  wx.request({
+  request({
     url: baseUrl + '/add_chatting',
     data: {
       phone: getApp().globalData.phone,
@@ -498,7 +499,7 @@ sethotnum3() {
     hotnum: 3
   })
   var that = this;
-  wx.request({
+  request({
     url: baseUrl + '/get_collectible',
     data: {
       phone: getApp().globalData.phone,
@@ -545,7 +546,7 @@ sethotnum3() {
       console.log('发送时iscollected的值为'+that.data.isCollected)
     }
   })
-wx.request({
+request({
   url: baseUrl + '/add_chatting',
   data: {
     phone: getApp().globalData.phone,
@@ -583,7 +584,7 @@ wx.request({
     let ansnum = nownum;   //回答的序号
     //获取此条问答是否被收藏成功
     var that=this
-    wx.request({
+    request({
       url: baseUrl + '/get_collectible',
       data: {
         phone: getApp().globalData.phone,
@@ -612,7 +613,7 @@ wx.request({
     if(msgList[nownum].Collected == 1){
       var that=this
       console.log("if ==1:接下来取消收藏")
-          wx.request({
+          request({
             url: baseUrl + '/remove_collectible',
             method: "POST",
             data: {
@@ -645,7 +646,7 @@ wx.request({
     else if(msgList[nownum].Collected == 0){ 
       console.log("if ==0:接下来进行收藏") 
       var that=this
-      wx.request({
+      request({
         url: baseUrl + '/add_collectible',
         data: {
           phone: getApp().globalData.phone,
@@ -697,7 +698,7 @@ wx.request({
   },
   // 后面全是语音识别功能  
   getUrl() {
-    wx.request({
+    request({
       url: baseUrl + '/url',//  服务器地址
       method: 'GET',
       header: {
@@ -722,7 +723,7 @@ wx.request({
               var xfurl = "";
               console.log("开始获取录音权鉴"),
 
-                wx.request({//  请求接口 获取讯飞语音鉴权
+                request({//  请求接口 获取讯飞语音鉴权
                   url: baseUrl + '/url',
                   // url:baseUrl + '/url',
                   method: "GET",
@@ -868,7 +869,7 @@ wx.request({
   onShow: function () {
    
     var that = this;
-    wx.request({
+    request({
       url: baseUrl + '/hotSearch',
       data: {
       },
@@ -1005,7 +1006,7 @@ wx.request({
 
   send() {
     var that = this
-    wx.request({
+    request({
       url: baseUrl + '/apart',
       data: {
         text: that.data.voiceResult,
@@ -1018,7 +1019,7 @@ wx.request({
         that.setData({
           answer: res.data
         })
-        wx.request({
+        request({
           url: baseUrl + '/get_collectible',
           data: {
             phone: getApp().globalData.phone,
@@ -1071,7 +1072,7 @@ wx.request({
       }
     })
    
-    wx.request({
+    request({
       url: baseUrl + '/add_chatting',
       data: {
         phone: getApp().globalData.phone,

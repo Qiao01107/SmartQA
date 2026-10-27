@@ -66,7 +66,6 @@ export default {
             //     }
             // }
             let that = this;
-            console.log(store);
             this.$axios
                 .post('/api/web_login', {
                     account: that.param.username,
@@ -74,14 +73,12 @@ export default {
                     type: that.radio
                 })
                 .then(response => {
-                    console.log(response);
                     const body = response.data;
-                    if (body && body.success === true && body.user) {
-                        // 保存会话令牌（本次为本地会话标记，后续如需服务端鉴权可替换为真实 token）
-                        store.commit('setToken', 'session-' + Date.now());
+                    // 后端登录成功时返回真实签名的 JWT，前端只负责保存与携带，不再伪造。
+                    if (body && body.success === true && body.token) {
+                        store.commit('setToken', body.token);
                         store.commit('setUserinfomation', body.user);
 
-                        console.log(store.state.userInfo);
                         that.$message({
                             message: '登录成功',
                             type: 'success'
@@ -95,9 +92,11 @@ export default {
                         });
                     }
                 })
-                .catch(() => {
+                .catch(error => {
+                    // 401 表示账号或密码错误，后端已给出明确提示。
+                    const body = error && error.response && error.response.data;
                     that.$message({
-                        message: '登录失败，请检查账号密码',
+                        message: (body && body.message) || '登录失败，请检查账号密码',
                         type: 'error'
                     });
                 });

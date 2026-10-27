@@ -36,6 +36,10 @@
     <select id="countWebUser" resultType="int">
         SELECT COUNT(*) FROM web_user
     </select>
+    <select id="countSuperAdmin" resultType="int">
+        SELECT COUNT(*) FROM web_user
+        WHERE adminType = '1'
+    </select>
     <select id="getWebUser" resultType="com.example.springboot.entity.WebUsers">
         SELECT * FROM web_user
         LIMIT #{start},#{number}

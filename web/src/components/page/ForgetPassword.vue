@@ -1,73 +1,70 @@
 <template>
     <div class="container">
         <div class="formas">
-            <div v-if="pd === true">
-                <el-form :model="userInformation" class="formClass" label-position="left" ref="userInformation">
+            <div v-if="step === 'request'">
+                <el-form :model="form" class="formClass" label-position="left">
                     <el-form-item>
                         <div class="title">验证用户</div>
                     </el-form-item>
                     <el-form-item label="账号:" label-width="100px" style="margin-top: 30px">
-                        <el-input v-model="userInformation.account" style="width: 300px" placeholder="请输入账号"></el-input>
+                        <el-input v-model="form.account" style="width: 300px" placeholder="请输入账号"></el-input>
                     </el-form-item>
                     <el-form-item label="手机号:" label-width="100px" style="margin-top: 30px">
                         <el-input
-                            v-model="userInformation.phone"
+                            v-model="form.phone"
                             style="width: 300px"
                             placeholder="请输入手机号"
-                            oninput="value=value.replace(/[^\d]/g,'')"
                             maxlength="11"
                         ></el-input>
                     </el-form-item>
-                    <el-form-item label="验证码:" label-width="100px" style="margin-top: 30px">
-                        <el-input
-                            v-model="userInformation.verification"
-                            style="width: 200px"
-                            placeholder="请输入验证码"
-                            oninput="value=value.replace(/[^\d]/g,'')"
-                            maxlength="6"
-                        ></el-input>
-                        <el-button
-                            type="info"
-                            @click="onSubmit()"
-                            style="margin-left: 10px; background-color: rgba(53, 54, 54, 0.368)"
-                            :disabled="wpd"
-                            >发送验证码</el-button
-                        >
-                    </el-form-item>
                     <div style="display: flex; justify-content: space-between; width: 100%">
                         <el-button style="margin-left: 30px; width: 100px; margin: 5px auto" @click="returnLogin()">返回</el-button>
-                        <el-button style="margin-left: 30px; width: 100px; margin: 5px auto" @click="confirmChangeAccount()" type="info"
-                            >确认</el-button
+                        <el-button
+                            style="margin-left: 30px; width: 140px; margin: 5px auto"
+                            type="info"
+                            :loading="sending"
+                            @click="sendCode()"
+                            >发送验证码</el-button
                         >
+                    </div>
+                    <div class="tip">
+                        验证码由服务端校验，不会在页面上显示；未配置短信服务时此功能不可用。
                     </div>
                 </el-form>
             </div>
             <div v-else>
-                <el-form :model="userInformation" class="formClass" label-position="left" ref="userInformation">
+                <el-form :model="form" class="formClass" label-position="left">
                     <el-form-item>
                         <div class="title">重置密码</div>
                     </el-form-item>
-                    <el-form-item label="新密码:" label-width="100px" style="margin-top: 30px">
+                    <el-form-item label="验证码:" label-width="100px" style="margin-top: 30px">
+                        <el-input v-model="form.code" style="width: 200px" placeholder="请输入短信验证码" maxlength="6"></el-input>
+                    </el-form-item>
+                    <el-form-item label="新密码:" label-width="100px" style="margin-top: 20px">
                         <el-input
-                            v-model="userInformation.password"
+                            v-model="form.newPassword"
                             type="password"
                             style="width: 300px"
-                            show-password="true"
-                            placeholder="请输入新密码"
+                            show-password
+                            placeholder="至少 8 位，含字母和数字"
                         ></el-input>
                     </el-form-item>
-                    <el-form-item label="新密码验证:" label-width="100px" style="margin-top: 30px">
+                    <el-form-item label="确认密码:" label-width="100px" style="margin-top: 20px">
                         <el-input
-                            v-model="userInformation.newPassword"
+                            v-model="form.confirmPassword"
                             type="password"
                             style="width: 300px"
-                            show-password="true"
+                            show-password
                             placeholder="请再次输入新密码"
                         ></el-input>
                     </el-form-item>
                     <div style="display: flex; justify-content: space-between; width: 100%">
                         <el-button style="margin-left: 30px; width: 100px; margin: 5px auto" @click="returnLogin()">返回</el-button>
-                        <el-button style="margin-left: 30px; width: 100px; margin: 5px auto" @click="confirmChange()" type="info"
+                        <el-button
+                            style="margin-left: 30px; width: 100px; margin: 5px auto"
+                            type="info"
+                            :loading="submitting"
+                            @click="submitReset()"
                             >确认修改</el-button
                         >
                     </div>
@@ -77,135 +74,107 @@
     </div>
 </template>
 <script>
+/**
+ * 忘记密码 / 重置密码。
+ *
+ * 旧实现在前端比对验证码，且调用的是无需登录的 /change_password——
+ * 任何人都能重置任意账号的密码。现在改为：
+ *   1. /forget_password 让服务端生成并保存验证码（响应里绝不返回验证码）；
+ *   2. /reset_password 由服务端校验验证码 + 手机号归属后重置密码。
+ */
 export default {
     name: 'ForgetPassword',
     data() {
         return {
-            userInformation: {
+            step: 'request',
+            sending: false,
+            submitting: false,
+            form: {
                 account: '',
                 phone: '',
-                password: '',
+                code: '',
                 newPassword: '',
-                verification: ''
-            },
-            verification: '',
-            pd: true,
-            wpd: false,
-            cxk: false
+                confirmPassword: ''
+            }
         };
     },
     methods: {
         returnLogin() {
-            this.$router.push('/Login');
+            this.$router.push('/login');
         },
-        onSubmit() {
-            let that = this;
-            if (this.userInformation.account === '') {
-                this.$message({
-                    message: '请输入账号',
-                    type: 'error'
-                });
-            } else if (this.userInformation.phone.length !== 11) {
-                this.$message({
-                    message: '请输入正确的手机号',
-                    type: 'error'
-                });
-            } else {
-                this.$axios
-                    .post('/api/forget_password', {
-                        account: that.userInformation.account,
-                        phoneNumber: that.userInformation.phone
-                    })
-                    .then(function(response) {
-                        if (response.data == '账号与手机号不匹配!') {
-                            that.$message({
-                                message: '账号与手机号不匹配,请重新输入!',
-                                type: 'error'
-                            });
-                            that.userInformation.account = '';
-                            that.userInformation.phone = '';
-                        } else {
-                            that.$message({
-                                message: '发送短信成功',
-                                type: 'success'
-                            });
-                            console.log(response.data);
-                            that.cxk = true;
-                            that.verification = response.data;
-                            that.wpd = true;
-                        }
-                    });
+        sendCode() {
+            if (!this.form.account) {
+                this.$message({ message: '请输入账号', type: 'error' });
+                return;
             }
+            if (!/^\d{11}$/.test(this.form.phone)) {
+                this.$message({ message: '请输入正确的手机号', type: 'error' });
+                return;
+            }
+            this.sending = true;
+            this.$axios
+                .post('/api/forget_password', {
+                    account: this.form.account,
+                    phoneNumber: this.form.phone
+                })
+                .then(response => {
+                    const body = response.data || {};
+                    if (body.success) {
+                        this.$message({ message: body.message || '验证码已发送', type: 'success' });
+                        this.step = 'reset';
+                    } else {
+                        this.$message({ message: body.message || '验证码发送失败', type: 'error' });
+                    }
+                })
+                .catch(error => {
+                    const body = error && error.response && error.response.data;
+                    this.$message({ message: (body && body.message) || '请求失败，请稍后重试', type: 'error' });
+                })
+                .finally(() => {
+                    this.sending = false;
+                });
         },
-        confirmChangeAccount() {
-            if (this.userInformation.account == '') {
-                this.$message({
-                    message: '请输入用户账号',
-                    type: 'error'
-                });
-            } else if (this.userInformation.phone == '') {
-                this.$message({
-                    message: '请输入用户手机号',
-                    type: 'error'
-                });
-            } else if (this.userInformation.phone.length !== 11) {
-                this.$message({
-                    message: '请输入正确的手机号',
-                    type: 'error'
-                });
-            } else if (this.cxk == false) {
-                this.$message({
-                    message: '请发送验证码',
-                    type: 'error'
-                });
-            } else if (
-                this.verification == this.userInformation.verification &&
-                this.userInformation.verification != null &&
-                this.userInformation.verification != ''
-            ) {
-                this.userInformation.verification = null;
-                this.pd = false;
-            } else {
-                this.$message({
-                    message: '验证码错误',
-                    type: 'error'
-                });
-                this.userInformation.verification = '';
+        submitReset() {
+            if (!this.form.code) {
+                this.$message({ message: '请输入短信验证码', type: 'error' });
+                return;
             }
-        },
-        confirmChange() {
-            let that = this;
-            if (this.userInformation.password == '') {
-                that.$message({
-                    message: '请填写新密码',
-                    type: 'error'
-                });
-            } else if (this.userInformation.newPassword == '') {
-                that.$message({
-                    message: '请再一次输入新密码',
-                    type: 'error'
-                });
-            } else if (this.userInformation.newPassword != this.userInformation.password) {
-                that.$message({
-                    message: '两次密码不匹配，请重新输入',
-                    type: 'error'
-                });
-                this.userInformation.password = '';
-                this.userInformation.newPassword = '';
-            } else {
-                this.$axios
-                    .post('/api/change_password', {
-                        account: that.userInformation.account,
-                        newPassword: that.userInformation.newPassword
-                    })
-                    .then(() => {
-                        that.$message({
-                            message: '修改密码成功',
-                            type: 'success'
-                        });
-                        that.$router.push('/login');
-                    });
+            if (!this.form.newPassword || this.form.newPassword.length < 8) {
+                this.$message({ message: '新密码至少 8 位', type: 'error' });
+                return;
             }
+            if (!/[A-Za-z]/.test(this.form.newPassword) || !/\d/.test(this.form.newPassword)) {
+                this.$message({ message: '新密码需同时包含字母和数字', type: 'error' });
+                return;
+            }
+            if (this.form.newPassword !== this.form.confirmPassword) {
+                this.$message({ message: '两次输入的密码不一致', type: 'error' });
+                return;
+            }
+            this.submitting = true;
+            this.$axios
+                .post('/api/reset_password', {
+                    account: this.form.account,
+                    phoneNumber: this.form.phone,
+                    code: this.form.code,
+                    newPassword: this.form.newPassword
+                })
+                .then(response => {
+                    const body = response.data || {};
+                    if (body.success) {
+                        this.$message({ message: body.message || '密码重置成功', type: 'success' });
+                        this.$router.push('/login');
+                    } else {
+                        this.$message({ message: body.message || '密码重置失败', type: 'error' });
+                    }
+                })
+                .catch(error => {
+                    const body = error && error.response && error.response.data;
+                    this.$message({ message: (body && body.message) || '请求失败，请稍后重试', type: 'error' });
+                })
+                .finally(() => {
+                    this.submitting = false;
+                });
         }
     }
 };
@@ -249,5 +218,12 @@ div {
     font-size: 24px;
     margin-top: 10px;
     font-weight: 700;
+}
+.tip {
+    margin: 16px 30px 0;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 18px;
+    color: #666;
 }
 </style>

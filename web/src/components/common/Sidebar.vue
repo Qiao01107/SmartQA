@@ -10,7 +10,7 @@
             unique-opened
             router
         >
-            <template v-for="item in items">
+            <template v-for="item in visibleItems">
                 <template v-if="item.subs">
                     <el-sub-menu :index="item.index" :key="item.index">
                         <template #title>
@@ -29,16 +29,10 @@
                     </el-sub-menu>
                 </template>
                 <template v-else>
-                    <div
-                        :index="item.index"
-                        :key="item.index"
-                        v-if="item.index != 'AdminManage' || (item.index == 'AdminManage' && userInfo.adminType == '1')"
-                    >
-                        <el-menu-item :index="item.index" :key="item.index">
-                            <i :class="item.icon"></i>
-                            <span>{{ item.title }}</span>
-                        </el-menu-item>
-                    </div>
+                    <el-menu-item :index="item.index" :key="item.index">
+                        <i :class="item.icon"></i>
+                        <span>{{ item.title }}</span>
+                    </el-menu-item>
                 </template>
             </template>
         </el-menu>
@@ -66,7 +60,10 @@ export default {
                 {
                     icon: 'el-icon-s-custom',
                     index: 'AdminManage',
-                    title: '管理员管理'
+                    title: '管理员管理',
+                    // 仅超级管理员可见（adminType='1'）。
+                    // 注意：菜单隐藏只是体验优化，真正的拦截在后端 ROLE_SUPER_ADMIN 规则上。
+                    roles: ['1']
                 },
                 {
                     icon: 'el-icon-s-tools',
@@ -123,6 +120,13 @@ export default {
         },
         userInfo() {
             return store.state.userInfo;
+        },
+        /** 按当前角色过滤菜单项；未声明 roles 的项对所有已登录管理员可见。 */
+        visibleItems() {
+            const adminType = String((this.userInfo && this.userInfo.adminType) || '');
+            return this.items.filter(
+                item => !item.roles || item.roles.indexOf(adminType) !== -1
+            );
         }
     },
     created() {

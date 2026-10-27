@@ -1,5 +1,6 @@
 // pages/collection/collection.js
 const { baseUrl } = require('../../utils/config.js');
+const { request } = require('../../utils/request.js');
 
 Page({
 
@@ -15,7 +16,7 @@ Page({
      */
     onLoad: function (options) {
         var that = this;
-    wx.request({
+    request({
       url: baseUrl + '/collectible',
       data: {
         phone: getApp().globalData.phone

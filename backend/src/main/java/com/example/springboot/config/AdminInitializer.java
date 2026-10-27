@@ -1,6 +1,7 @@
 package com.example.springboot.config;
 
 import com.example.springboot.dao.AdminManageMapper;
+import com.example.springboot.security.PasswordPolicy;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import org.slf4j.Logger;
@@ -21,13 +22,14 @@ import org.springframework.stereotype.Component;
  *   <li>初始化失败（如数据库异常）会抛出异常并记录 ERROR 日志，不静默跳过。</li>
  * </ul>
  *
- * <p>环境变量（可选，均有默认值）：
+ * <p>环境变量（均为必填，<b>不提供默认弱口令</b>）：
  * <ul>
- *   <li>INIT_ADMIN_ACCOUNT（默认 admin）</li>
- *   <li>INIT_ADMIN_PASSWORD（默认 admin）</li>
+ *   <li>INIT_ADMIN_ACCOUNT（如 admin）</li>
+ *   <li>INIT_ADMIN_PASSWORD（需满足 {@link PasswordPolicy}：≥8 位且含字母与数字）</li>
  *   <li>INIT_ADMIN_NAME（默认 超级管理员）</li>
  *   <li>INIT_ADMIN_PHONE（默认 13800000000）</li>
  * </ul>
+ * 未配置或不满足策略时，只记录 ERROR 日志并跳过创建（fail-closed），不会退回到弱口令。
  */
 @Component
 public class AdminInitializer implements ApplicationRunner {
@@ -44,8 +46,8 @@ public class AdminInitializer implements ApplicationRunner {
 
   public AdminInitializer(AdminManageMapper adminManageMapper,
       PasswordEncoderUtil passwordEncoderUtil,
-      @Value("${INIT_ADMIN_ACCOUNT:admin}") String account,
-      @Value("${INIT_ADMIN_PASSWORD:admin}") String password,
+      @Value("${INIT_ADMIN_ACCOUNT:}") String account,
+      @Value("${INIT_ADMIN_PASSWORD:}") String password,
       @Value("${INIT_ADMIN_NAME:超级管理员}") String name,
       @Value("${INIT_ADMIN_PHONE:13800000000}") String phone) {
     this.adminManageMapper = adminManageMapper;
@@ -65,7 +67,16 @@ public class AdminInitializer implements ApplicationRunner {
       return;
     }
     if (isBlank(account) || isBlank(password)) {
-      log.warn("[AdminInit] INIT_ADMIN_ACCOUNT / INIT_ADMIN_PASSWORD 未配置，跳过创建初始管理员。");
+      log.error("[AdminInit] web_user 表为空，但 INIT_ADMIN_ACCOUNT / INIT_ADMIN_PASSWORD 未配置，"
+          + "本次不会创建任何管理员（fail-closed，不提供默认弱口令）。"
+          + "请在 .env 中配置后重启。");
+      return;
+    }
+    // 不再允许 admin/admin 这类弱口令作为初始凭据。
+    String policyError = PasswordPolicy.validateAdminPassword(password);
+    if (policyError != null) {
+      log.error("[AdminInit] INIT_ADMIN_PASSWORD 不满足密码策略：{}。"
+          + "本次不会创建管理员，请修改 .env 后重启。", policyError);
       return;
     }
     // BCrypt 哈希后落库，绝不保存明文。

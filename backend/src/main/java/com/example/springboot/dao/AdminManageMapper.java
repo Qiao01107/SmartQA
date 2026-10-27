@@ -31,6 +31,9 @@ public interface AdminManageMapper {
 
   int countWebUser();
 
+  // 超级管理员数量（用于“不允许删除/降级最后一个超管”的兜底校验）
+  int countSuperAdmin();
+
   List<WebUsers> getWebUser(@Param("start") int start, @Param("number") int number);
 
   List<WebUsers> findAllWebUser();

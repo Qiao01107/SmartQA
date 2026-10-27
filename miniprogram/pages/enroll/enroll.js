@@ -1,5 +1,6 @@
 // pages/enroll/enroll.js
 const { baseUrl } = require('../../utils/config.js');
+const { request } = require('../../utils/request.js');
 
 Page({
 
@@ -82,7 +83,7 @@ Page({
     } else {
       console.log("userInfo", getApp().globalData.userInfo.avatarUrl);
       that.data.avatarUrl=getApp().globalData.userInfo.avatarUrl;
-      wx.request({
+      request({
         url: baseUrl + '/wechat_register',
       data:{
         wechatName: that.data.username,
@@ -95,16 +96,14 @@ Page({
             "Content-Type": "application/json"
           },
           success: function (res) {
-            console.log(res.data)
-            if(res.data == false)
-            wx.showModal({
-            title: '提示！',
-            showCancel: false,
-            content: '手机号已存在！',
-            success: function (res) { }
-            })
-            else if(res.data == true){
-              getApp().globalData.userInfo_detail = res.data.data
+            var body = res.data || {};
+            if (body.success === false) {
+              wx.showModal({
+                title: '提示！',
+                showCancel: false,
+                content: body.message || '注册失败'
+              })
+            } else if (body.success === true) {
               wx.showModal({
               title: '恭喜！',
               showCancel: false,

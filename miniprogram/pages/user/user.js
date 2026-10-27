@@ -42,9 +42,14 @@ Page({
     })
   },
   out: function () {
-    wx.clearStorage(),
-    wx.reLaunch({
-      url: '../login/login',
+    const { logout } = require('../../utils/request.js');
+    // 先让后端吊销令牌，再清理本地登录态并回到登录页。
+    logout(function () {
+      getApp().globalData.phone = null;
+      getApp().globalData.userInfo = null;
+      wx.reLaunch({
+        url: '../login/login',
+      })
     })
 },
   /**
